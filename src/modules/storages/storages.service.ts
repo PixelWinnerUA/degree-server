@@ -1,26 +1,36 @@
-import { Injectable } from '@nestjs/common';
-import { CreateStorageDto } from './dto/create-storage.dto';
-import { UpdateStorageDto } from './dto/update-storage.dto';
+import { Injectable } from "@nestjs/common";
+import { CreateStorageDto } from "./dto";
+import { InjectModel } from "@nestjs/sequelize";
+import { Storage } from "./models/storages.model";
+import { UserStorage } from "./models/user-storage.model";
+import { ResponseMessages } from "../../common/constants/messages.constants";
 
 @Injectable()
 export class StoragesService {
-  create(createStorageDto: CreateStorageDto) {
-    return 'This action adds a new storage';
-  }
+    constructor(
+        @InjectModel(Storage) private storageRepository: typeof Storage,
+        @InjectModel(UserStorage) private userStorageRepository: typeof UserStorage
+    ) {}
 
-  findAll() {
-    return `This action returns all storages`;
-  }
+    async create(dto: CreateStorageDto, userId: number) {
+        const storage = await this.storageRepository.create(dto);
 
-  findOne(id: number) {
-    return `This action returns a #${id} storage`;
-  }
+        const userStorage = {
+            userId,
+            storageId: storage.id
+        };
 
-  update(id: number, updateStorageDto: UpdateStorageDto) {
-    return `This action updates a #${id} storage`;
-  }
+        await this.userStorageRepository.create(userStorage);
 
-  remove(id: number) {
-    return `This action removes a #${id} storage`;
-  }
+        return ResponseMessages.STORAGE_CREATED;
+    }
+
+    async getStoragesByUserId(userId: number) {
+        const userStorages = await UserStorage.findAll({
+            where: { userId },
+            include: [Storage]
+        });
+
+        return userStorages.map((userStorage) => userStorage.storage);
+    }
 }

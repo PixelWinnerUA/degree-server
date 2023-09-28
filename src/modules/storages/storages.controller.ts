@@ -1,34 +1,22 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { StoragesService } from './storages.service';
-import { CreateStorageDto } from './dto/create-storage.dto';
-import { UpdateStorageDto } from './dto/update-storage.dto';
+import { Body, Controller, Get, Post, Req, UseGuards } from "@nestjs/common";
+import { StoragesService } from "./storages.service";
+import { JwtAuthGuard } from "../../guards/jwt-guard";
+import { CreateStorageDto } from "./dto";
+import { Request } from "../../common/interfaces/common.interfaces";
 
-@Controller('storages')
+@Controller("storages")
 export class StoragesController {
-  constructor(private readonly storagesService: StoragesService) {}
+    constructor(private readonly storagesService: StoragesService) {}
 
-  @Post()
-  create(@Body() createStorageDto: CreateStorageDto) {
-    return this.storagesService.create(createStorageDto);
-  }
+    @UseGuards(JwtAuthGuard)
+    @Post("create")
+    async create(@Body() dto: CreateStorageDto, @Req() request: Request) {
+        return await this.storagesService.create(dto, request.user.id);
+    }
 
-  @Get()
-  findAll() {
-    return this.storagesService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.storagesService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateStorageDto: UpdateStorageDto) {
-    return this.storagesService.update(+id, updateStorageDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.storagesService.remove(+id);
-  }
+    @UseGuards(JwtAuthGuard)
+    @Get()
+    async get(@Req() request: Request) {
+        return await this.storagesService.getStoragesByUserId(request.user.id);
+    }
 }

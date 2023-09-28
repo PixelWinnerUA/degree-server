@@ -14,7 +14,4 @@ export class Storage extends Model<Storage, StorageCreationAttrs> {
     @ApiProperty({ example: "Storage 1" })
     @Column({ type: DataType.STRING, allowNull: false })
     name: string;
-
-    @Column({ type: DataType.JSONB, allowNull: true })
-    user_ids: number[];
 }

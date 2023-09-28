@@ -31,7 +31,7 @@ export class UsersService {
         return await this.userRepository.findOne({ where: { email }, attributes: { exclude: ["password"] } });
     }
 
-    async updateUserName(id: string, dto: UpdateUserDto): Promise<string> {
+    async updateUserName(dto: UpdateUserDto, id: number): Promise<string> {
         const affectedUsers = await this.userRepository.update(dto, { where: { id } });
 
         if (affectedUsers[0] !== 1) {

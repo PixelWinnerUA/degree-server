@@ -24,7 +24,4 @@ export class User extends Model<User, UserCreationAttrs> {
     @ApiProperty({ example: "password" })
     @Column({ type: DataType.STRING, allowNull: false })
     password: string;
-
-    @Column({ type: DataType.JSONB, allowNull: true })
-    storage_ids: number[];
 }

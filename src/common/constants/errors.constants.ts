@@ -8,5 +8,6 @@ export const AppError = {
 export const ValidationError = {
     INVALID_EMAIL: "Invalid email format.",
     MUST_BE_STRING: "Must be a string.",
+    MUST_BE_NUMBER: "Must be a number.",
     INVALID_PASSWORD_LENGTH: "Invalid Password length."
 };

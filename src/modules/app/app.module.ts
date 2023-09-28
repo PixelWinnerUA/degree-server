@@ -6,6 +6,9 @@ import { User } from "../users/models/users.model";
 import { AuthModule } from "../auth/auth.module";
 import { TokenModule } from "../token/token.module";
 import * as process from "process";
+import { StoragesModule } from "../storages/storages.module";
+import { Storage } from "../storages/models/storages.model";
+import { UserStorage } from "../storages/models/user-storage.model";
 
 @Module({
     imports: [
@@ -17,13 +20,14 @@ import * as process from "process";
             username: process.env.DATABASE_USERNAME,
             password: process.env.DATABASE_PASSWORD,
             database: process.env.DATABASE_NAME,
-            models: [User],
+            models: [User, Storage, UserStorage],
             autoLoadModels: true,
             synchronize: true
         }),
         UsersModule,
         AuthModule,
-        TokenModule
+        TokenModule,
+        StoragesModule
     ],
     controllers: [],
     providers: []
