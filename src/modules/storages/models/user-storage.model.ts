@@ -1,4 +1,4 @@
-import { BelongsTo, Column, DataType, ForeignKey, Model, Table } from "sequelize-typescript";
+import { BelongsTo, BelongsToMany, Column, DataType, ForeignKey, Model, Table } from "sequelize-typescript";
 import { User } from "../../users/models/users.model";
 import { Storage } from "./storages.model";
 
@@ -8,6 +8,8 @@ interface UserStorageCreationAttrs {
 }
 
 @Table({ tableName: "user_storage" })
+@BelongsToMany(() => User, () => UserStorage)
+@BelongsToMany(() => Storage, () => UserStorage)
 export class UserStorage extends Model<UserStorage, UserStorageCreationAttrs> {
     @Column({ type: DataType.INTEGER, primaryKey: true, autoIncrement: true })
     id: number;
@@ -26,23 +28,3 @@ export class UserStorage extends Model<UserStorage, UserStorageCreationAttrs> {
     @BelongsTo(() => Storage)
     storage: Storage;
 }
-
-// @Table({ tableName: "user_storage" })
-// export class UserStorage extends Model<UserStorage, UserStorageCreationAttrs> {
-//     @Column({ type: DataType.INTEGER, primaryKey: true, autoIncrement: true })
-//     id: number;
-//
-//     @ForeignKey(() => User)
-//     @Column({ type: DataType.INTEGER, allowNull: false, references: { model: User, key: "id" } })
-//     userId: number;
-//
-//     @ForeignKey(() => Storage)
-//     @Column({ type: DataType.INTEGER, allowNull: false, references: { model: Storage, key: "id" } })
-//     storageId: number;
-//
-//     @BelongsTo(() => User, "userId")
-//     user: User;
-//
-//     @BelongsTo(() => Storage, "storageId")
-//     storage: Storage;
-// }

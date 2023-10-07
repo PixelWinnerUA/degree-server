@@ -32,7 +32,12 @@ export class AuthService {
 
         const publicUser = await this.userService.getPublicUser(dto.email);
 
-        return { ...publicUser, token };
+        const userData = {
+            name: publicUser.name,
+            email: publicUser.email
+        };
+
+        return { ...userData, token };
     }
 
     async loginUser(dto: UserLoginDto): Promise<AuthUserResponse> {
@@ -48,11 +53,15 @@ export class AuthService {
             throw new BadRequestException(AppError.WRONG_DATA);
         }
 
+        const userData = {
+            name: existUser.name,
+            email: existUser.email
+        };
+
         const token = await this.tokenService.generateJwt(existUser.id);
 
         return {
-            name: existUser.name,
-            email: existUser.email,
+            ...userData,
             token
         };
     }

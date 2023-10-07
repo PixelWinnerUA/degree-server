@@ -4,6 +4,8 @@ import { InjectModel } from "@nestjs/sequelize";
 import { hash } from "bcrypt";
 import { CreateUserDto, UpdateUserDto } from "./dto";
 import { ResponseMessages } from "../../common/constants/messages.constants";
+import { AppError } from "../../common/constants/errors.constants";
+import { FindOptions } from "sequelize";
 
 @Injectable()
 export class UsersService {
@@ -13,12 +15,12 @@ export class UsersService {
         return await hash(password, 10);
     }
 
-    async findByEmail(email: string): Promise<User> {
-        return await this.userRepository.findOne({ where: { email } });
+    async findByEmail(email: string, options?: Omit<FindOptions<User>, "where">): Promise<User> {
+        return await this.userRepository.findByPk(email, options);
     }
 
-    async findById(id: string): Promise<User> {
-        return await this.userRepository.findOne({ where: { id } });
+    async findById(id: number, options?: Omit<FindOptions<User>, "where">): Promise<User> {
+        return await this.userRepository.findByPk(id, options);
     }
 
     async create(dto: CreateUserDto): Promise<User> {
@@ -28,16 +30,16 @@ export class UsersService {
     }
 
     async getPublicUser(email: string): Promise<Omit<User, "password">> {
-        return await this.userRepository.findOne({ where: { email }, attributes: { exclude: ["password"] } });
+        return await this.findByEmail(email, { attributes: { exclude: ["password"] } });
     }
 
     async updateUserName(dto: UpdateUserDto, id: number): Promise<string> {
-        const affectedUsers = await this.userRepository.update(dto, { where: { id } });
+        const [affectedUsers] = await this.userRepository.update(dto, { where: { id } });
 
-        if (affectedUsers[0] !== 1) {
-            throw new BadRequestException();
+        if (affectedUsers !== 1) {
+            throw new BadRequestException(AppError.USER_UPDATE_ERROR);
         }
 
-        return ResponseMessages.SUCCESS_NAME_UPDATE;
+        return ResponseMessages.SUCCESS_USER_NAME_UPDATE;
     }
 }
