@@ -5,7 +5,7 @@ import { hash } from "bcrypt";
 import { CreateUserDto, UpdateUserDto } from "./dto";
 import { ResponseMessages } from "../../common/constants/messages.constants";
 import { AppError } from "../../common/constants/errors.constants";
-import { FindOptions } from "sequelize";
+import { FindAttributeOptions, FindOptions } from "sequelize";
 
 @Injectable()
 export class UsersService {
@@ -15,8 +15,8 @@ export class UsersService {
         return await hash(password, 10);
     }
 
-    async findByEmail(email: string, options?: Omit<FindOptions<User>, "where">): Promise<User> {
-        return await this.userRepository.findByPk(email, options);
+    async findByEmail(email: string, attributes?: FindAttributeOptions): Promise<User> {
+        return await this.userRepository.findOne({ where: { email }, attributes });
     }
 
     async findById(id: number, options?: Omit<FindOptions<User>, "where">): Promise<User> {
@@ -30,7 +30,7 @@ export class UsersService {
     }
 
     async getPublicUser(email: string): Promise<Omit<User, "password">> {
-        return await this.findByEmail(email, { attributes: { exclude: ["password"] } });
+        return await this.findByEmail(email, { exclude: ["password"] });
     }
 
     async updateUserName(dto: UpdateUserDto, id: number): Promise<string> {
