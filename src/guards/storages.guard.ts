@@ -10,9 +10,13 @@ export class StoragesGuard implements CanActivate {
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const request: Request = context.switchToHttp().getRequest<Request>();
-        const userId = request.user.id;
-        const storageId = request.body.storageId || request.body.id || +request.params.id;
+        const userId: number = request.user.id;
+        const storageId: number | undefined = request.body.storageId || request.body.id || +request.params.id || +request.params.storageId;
 
+        return await this.checkStorageAccess(userId, storageId);
+    }
+
+    async checkStorageAccess(userId: number, storageId: number | undefined): Promise<boolean> {
         if (!storageId) {
             throw new NotFoundException(AppError.STORAGE_NOT_FOUND);
         }

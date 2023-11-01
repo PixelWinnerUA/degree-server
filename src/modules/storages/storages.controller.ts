@@ -1,62 +1,72 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Put, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Req, UseGuards } from "@nestjs/common";
 import { StoragesService } from "./storages.service";
-import { JwtAuthGuard } from "../../guards/jwt-guard";
-import { CreateStorageDto, DeleteStorageDto, UpdateStorageDto } from "./dto";
-import { Request } from "../../common/interfaces/common.interfaces";
-import { ResponseMessages } from "../../common/constants/messages.constants";
-import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
-import { GetStoragesResponse } from "./response";
-import { CreateShelfDto } from "../shelves/dto";
-import { StoragesGuard } from "../../guards/storages-guard";
 
+import { AddUserToStorageDto, CreateStorageDto, DeleteStorageDto, DeleteUserFromStorageDto, UpdateStorageDto } from "./dto";
+import { Request, SuccessMessageResponse } from "../../common/interfaces/common.interfaces";
+import { ResponseMessages } from "../../common/constants/messages.constants";
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { GetStorageInfoResponse, GetStorageResponse } from "./response";
+import { JwtAuthGuard } from "../../guards/jwt.guard";
+import { StoragesGuard } from "../../guards/storages.guard";
+
+@ApiBearerAuth()
 @ApiTags("Storages")
 @Controller("storages")
+@UseGuards(JwtAuthGuard)
 export class StoragesController {
     constructor(private readonly storagesService: StoragesService) {}
 
     @ApiOperation({ description: "Create storage" })
     @ApiResponse({ status: 200, description: ResponseMessages.SUCCESS_STORAGE_CREATE })
-    @UseGuards(JwtAuthGuard)
-    @Post("create")
-    async create(@Body() dto: CreateStorageDto, @Req() request: Request): Promise<typeof ResponseMessages.SUCCESS_STORAGE_CREATE> {
+    @Post()
+    async create(@Body() dto: CreateStorageDto, @Req() request: Request): Promise<SuccessMessageResponse> {
         return await this.storagesService.create(dto, request.user.id);
     }
 
     @ApiOperation({ description: "Get storages" })
-    @ApiResponse({ status: 200, type: [GetStoragesResponse] })
-    @UseGuards(JwtAuthGuard)
+    @ApiResponse({ status: 200, type: [GetStorageResponse] })
     @Get()
-    async get(@Req() request: Request): Promise<GetStoragesResponse[]> {
+    async getAll(@Req() request: Request): Promise<GetStorageResponse[]> {
         return await this.storagesService.getStoragesByUserId(request.user.id);
     }
 
     @ApiOperation({ description: "Storage name update" })
     @ApiResponse({ status: 200, description: ResponseMessages.SUCCESS_STORAGE_NAME_UPDATE })
-    @UseGuards(JwtAuthGuard, StoragesGuard)
-    @Patch("update")
-    async update(@Body() dto: UpdateStorageDto): Promise<typeof ResponseMessages.SUCCESS_STORAGE_NAME_UPDATE> {
+    @UseGuards(StoragesGuard)
+    @Patch()
+    async update(@Body() dto: UpdateStorageDto): Promise<SuccessMessageResponse> {
         return await this.storagesService.update(dto);
     }
 
     @ApiOperation({ description: "Delete storage" })
     @ApiResponse({ status: 200, description: ResponseMessages.SUCCESS_STORAGE_DELETE })
-    @UseGuards(JwtAuthGuard, StoragesGuard)
-    @Delete("delete")
-    async delete(@Body() dto: DeleteStorageDto): Promise<typeof ResponseMessages.SUCCESS_STORAGE_DELETE> {
+    @UseGuards(StoragesGuard)
+    @Delete()
+    async delete(@Body() dto: DeleteStorageDto): Promise<SuccessMessageResponse> {
         return await this.storagesService.delete(dto);
     }
 
-    @ApiOperation({ description: "Add shelf" })
-    @ApiResponse({ status: 200, description: ResponseMessages.SUCCESS_SHELF_CREATE })
-    @UseGuards(JwtAuthGuard, StoragesGuard)
-    @Put("addShelf")
-    async addShelf(@Body() dto: CreateShelfDto): Promise<typeof ResponseMessages.SUCCESS_SHELF_CREATE> {
-        return await this.storagesService.addShelf(dto);
+    @ApiOperation({ description: "Get storage info by Id" })
+    @ApiResponse({ status: 200, type: GetStorageInfoResponse })
+    @UseGuards(StoragesGuard)
+    @Get(":id")
+    async getStorageInfo(@Param("id", ParseIntPipe) id: number): Promise<GetStorageInfoResponse> {
+        return await this.storagesService.getStorageInfo(id);
     }
 
-    @UseGuards(JwtAuthGuard, StoragesGuard)
-    @Get(":id")
-    async getShelves(@Param("id", ParseIntPipe) id: number) {
-        return await this.storagesService.getShelves(id);
+    @ApiOperation({ description: "Delete a user from the storage" })
+    @ApiResponse({ status: 200, description: ResponseMessages.SUCCESS_USER_DELETE_FROM_STORAGE })
+    @UseGuards(StoragesGuard)
+    @Delete("deleteUser")
+    async deleteUserFromStorage(@Body() dto: DeleteUserFromStorageDto, @Req() request: Request): Promise<SuccessMessageResponse> {
+        return await this.storagesService.deleteUserFromStorage(dto, request.user.id);
+    }
+
+    @ApiOperation({ description: "Add new user to the storage" })
+    @ApiResponse({ status: 200, description: ResponseMessages.SUCCESS_USER_ADD })
+    @UseGuards(StoragesGuard)
+    @Post("addUser")
+    async addUserToStorage(@Body() dto: AddUserToStorageDto, @Req() request: Request): Promise<SuccessMessageResponse> {
+        return await this.storagesService.addUserToStorage(dto, request.user.id);
     }
 }

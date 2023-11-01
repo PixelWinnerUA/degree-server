@@ -1,15 +1,15 @@
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
-import { CreateStorageDto, DeleteStorageDto, UpdateStorageDto } from "./dto";
+import { BadRequestException, Injectable } from "@nestjs/common";
+import { AddUserToStorageDto, CreateStorageDto, DeleteStorageDto, DeleteUserFromStorageDto, UpdateStorageDto } from "./dto";
 import { InjectModel } from "@nestjs/sequelize";
 import { Storage } from "./models/storages.model";
 import { UserStorage } from "./models/user-storage.model";
 import { ResponseMessages } from "../../common/constants/messages.constants";
 import { AppError } from "../../common/constants/errors.constants";
-import { GetStoragesResponse } from "./response";
-import { ShelvesService } from "../shelves/shelves.service";
-import { CreateShelfDto } from "../shelves/dto";
-import { Shelf } from "../shelves/models/shelves.model";
+import { GetStorageInfoResponse, GetStorageResponse } from "./response";
 import { FindOptions } from "sequelize";
+import { getResponseMessageObject } from "../../common/helpers/getResponseMessageObject";
+import { SuccessMessageResponse } from "../../common/interfaces/common.interfaces";
+import { User } from "../users/models/users.model";
 import { UsersService } from "../users/users.service";
 
 @Injectable()
@@ -17,12 +17,11 @@ export class StoragesService {
     constructor(
         @InjectModel(Storage) private storageRepository: typeof Storage,
         @InjectModel(UserStorage) private userStorageRepository: typeof UserStorage,
-        private readonly shelvesService: ShelvesService,
         private readonly usersService: UsersService
     ) {}
 
-    async create(dto: CreateStorageDto, userId: number): Promise<typeof ResponseMessages.SUCCESS_STORAGE_CREATE> {
-        const storage = await this.storageRepository.create(dto);
+    async create(dto: CreateStorageDto, userId: number): Promise<SuccessMessageResponse> {
+        const storage = await this.storageRepository.create({ ...dto, ownerId: userId });
 
         const userStorage = {
             userId,
@@ -31,10 +30,10 @@ export class StoragesService {
 
         await this.userStorageRepository.create(userStorage);
 
-        return ResponseMessages.SUCCESS_STORAGE_CREATE;
+        return getResponseMessageObject(ResponseMessages.SUCCESS_STORAGE_CREATE);
     }
 
-    async findById(storageId: number, options?: Omit<FindOptions<Storage>, "where">) {
+    async findById(storageId: number, options?: Omit<FindOptions<Storage>, "where">): Promise<Storage> {
         return await this.storageRepository.findByPk(storageId, options);
     }
 
@@ -49,7 +48,7 @@ export class StoragesService {
         return !!userStorage;
     }
 
-    async update(dto: UpdateStorageDto): Promise<typeof ResponseMessages.SUCCESS_STORAGE_NAME_UPDATE> {
+    async update(dto: UpdateStorageDto): Promise<SuccessMessageResponse> {
         const { id, name } = dto;
 
         const [affectedStorages] = await this.storageRepository.update({ name }, { where: { id } });
@@ -58,13 +57,13 @@ export class StoragesService {
             throw new BadRequestException(AppError.STORAGE_UPDATE_ERROR);
         }
 
-        return ResponseMessages.SUCCESS_STORAGE_NAME_UPDATE;
+        return getResponseMessageObject(ResponseMessages.SUCCESS_STORAGE_NAME_UPDATE);
     }
 
-    async delete(dto: DeleteStorageDto): Promise<typeof ResponseMessages.SUCCESS_STORAGE_DELETE> {
+    async delete(dto: DeleteStorageDto): Promise<SuccessMessageResponse> {
         const storage = await this.findById(dto.id);
 
-        await UserStorage.destroy({
+        await this.userStorageRepository.destroy({
             where: {
                 storageId: dto.id
             }
@@ -72,36 +71,82 @@ export class StoragesService {
 
         await storage.destroy();
 
-        return ResponseMessages.SUCCESS_STORAGE_DELETE;
+        return getResponseMessageObject(ResponseMessages.SUCCESS_STORAGE_DELETE);
     }
 
-    async getStoragesByUserId(userId: number): Promise<GetStoragesResponse[]> {
-        const user = await this.usersService.findById(userId, { include: Storage });
+    async getStoragesByUserId(userId: number): Promise<GetStorageResponse[]> {
+        const storages = await Storage.findAll({
+            include: [
+                {
+                    model: User,
+                    where: { id: userId },
+                    attributes: []
+                }
+            ],
+            attributes: { exclude: ["updatedAt"] }
+        });
+
+        return storages as GetStorageResponse[];
+    }
+
+    async getUsersById(id: number): Promise<User[]> {
+        const storage = await this.findById(id, {
+            include: [
+                {
+                    model: User,
+                    attributes: { exclude: ["password", "createdAt", "updatedAt"] },
+                    through: { attributes: [] }
+                }
+            ]
+        });
+
+        return storage.users;
+    }
+
+    async getStorageInfo(id: number): Promise<GetStorageInfoResponse> {
+        const users = await this.getUsersById(id);
+        const storage = await this.findById(id, { attributes: { exclude: ["updatedAt"] } });
+
+        return { storage, users };
+    }
+
+    async deleteUserFromStorage(dto: DeleteUserFromStorageDto, requestUserId: number): Promise<SuccessMessageResponse> {
+        const storage = await this.findById(dto.id);
+        const hasAccess = requestUserId === storage.ownerId;
+
+        if (!hasAccess) {
+            throw new BadRequestException(AppError.NO_ACCESS);
+        }
+
+        await this.userStorageRepository.destroy({
+            where: {
+                storageId: dto.id,
+                userId: dto.userId
+            }
+        });
+
+        return getResponseMessageObject(ResponseMessages.SUCCESS_USER_DELETE_FROM_STORAGE);
+    }
+
+    async addUserToStorage(dto: AddUserToStorageDto, requestUserId: number): Promise<SuccessMessageResponse> {
+        const user = await this.usersService.findByEmail(dto.email);
 
         if (!user) {
             throw new BadRequestException(AppError.USER_NOT_EXIST);
         }
 
-        return user.storages.map((storage) => ({ id: storage.id, name: storage.name }));
-    }
-
-    async addShelf(dto: CreateShelfDto): Promise<typeof ResponseMessages.SUCCESS_SHELF_CREATE> {
-        const storage = await this.findById(dto.storageId);
-
-        const shelf = await this.shelvesService.create(dto);
-
-        await storage.$add("shelves", shelf);
-
-        return ResponseMessages.SUCCESS_SHELF_CREATE;
-    }
-
-    async getShelves(storageId: number): Promise<Shelf[]> {
-        const storage = await this.findById(storageId, { include: Shelf });
-
-        if (!storage) {
-            throw new NotFoundException(AppError.STORAGE_NOT_FOUND);
+        if (user.id === requestUserId) {
+            throw new BadRequestException(AppError.CANNOT_ADD_YOURSELF);
         }
 
-        return storage.shelves;
+        const userStorage = await this.userStorageRepository.findOne({ where: { userId: user.id, storageId: dto.storageId } });
+
+        if (userStorage) {
+            throw new BadRequestException(AppError.USER_ALREADY_IN_LIST);
+        }
+
+        await this.userStorageRepository.create({ userId: user.id, storageId: dto.storageId });
+
+        return getResponseMessageObject(ResponseMessages.SUCCESS_USER_ADD);
     }
 }

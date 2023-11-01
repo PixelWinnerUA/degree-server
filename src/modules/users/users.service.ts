@@ -6,6 +6,9 @@ import { CreateUserDto, UpdateUserDto } from "./dto";
 import { ResponseMessages } from "../../common/constants/messages.constants";
 import { AppError } from "../../common/constants/errors.constants";
 import { FindAttributeOptions, FindOptions } from "sequelize";
+import { GetPublicUserResponse } from "./response";
+import { getResponseMessageObject } from "../../common/helpers/getResponseMessageObject";
+import { SuccessMessageResponse } from "../../common/interfaces/common.interfaces";
 
 @Injectable()
 export class UsersService {
@@ -29,17 +32,17 @@ export class UsersService {
         return await this.userRepository.create(dto);
     }
 
-    async getPublicUser(email: string): Promise<Omit<User, "password">> {
-        return await this.findByEmail(email, { exclude: ["password"] });
+    async getPublicUser(id: number): Promise<GetPublicUserResponse> {
+        return await this.findById(id, { attributes: { exclude: ["password", "createdAt", "updatedAt"] } });
     }
 
-    async updateUserName(dto: UpdateUserDto, id: number): Promise<string> {
+    async updateUserName(dto: UpdateUserDto, id: number): Promise<SuccessMessageResponse> {
         const [affectedUsers] = await this.userRepository.update(dto, { where: { id } });
 
         if (affectedUsers !== 1) {
             throw new BadRequestException(AppError.USER_UPDATE_ERROR);
         }
 
-        return ResponseMessages.SUCCESS_USER_NAME_UPDATE;
+        return getResponseMessageObject(ResponseMessages.SUCCESS_USER_NAME_UPDATE);
     }
 }

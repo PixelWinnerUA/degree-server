@@ -12,6 +12,7 @@ import { UserStorage } from "../storages/models/user-storage.model";
 import { ShelvesModule } from "../shelves/shelves.module";
 import { Shelf } from "../shelves/models/shelves.model";
 import { Product } from "../products/models/products.model";
+import { ProductsModule } from "../products/products.module";
 
 @Module({
     imports: [
@@ -31,7 +32,8 @@ import { Product } from "../products/models/products.model";
         AuthModule,
         TokenModule,
         StoragesModule,
-        ShelvesModule
+        ShelvesModule,
+        ProductsModule
     ],
     controllers: [],
     providers: []

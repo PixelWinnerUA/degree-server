@@ -14,7 +14,7 @@ export class Shelf extends Model<Shelf, ShelfCreationAttrs> {
     @Column({ type: DataType.INTEGER, unique: true, autoIncrement: true, primaryKey: true })
     id: number;
 
-    @ApiProperty({ example: "Storage 1" })
+    @ApiProperty({ example: "Shelf 1" })
     @Column({ type: DataType.STRING, allowNull: false })
     name: string;
 

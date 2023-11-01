@@ -6,6 +6,8 @@ import { Shelf } from "../../shelves/models/shelves.model";
 
 interface StorageCreationAttrs {
     name: string;
+    address: string;
+    ownerId: number;
 }
 
 @Table({ tableName: "storage" })
@@ -18,6 +20,13 @@ export class Storage extends Model<Storage, StorageCreationAttrs> {
     @ApiProperty({ example: "Storage 1" })
     @Column({ type: DataType.STRING, allowNull: false })
     name: string;
+
+    @ApiProperty({ example: "Address string" })
+    @Column({ type: DataType.STRING, allowNull: false })
+    address: string;
+
+    @Column({ type: DataType.INTEGER })
+    ownerId: number;
 
     @BelongsToMany(() => User, () => UserStorage)
     users: User[];

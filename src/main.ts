@@ -3,18 +3,29 @@ import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { ValidationPipe } from "@nestjs/common";
 import { AppModule } from "./modules/app/app.module";
 import * as process from "process";
+import { CorsOptions } from "@nestjs/common/interfaces/external/cors-options.interface";
 
 async function start() {
     const app = await NestFactory.create(AppModule);
     const port = Number(process.env.SERVER_PORT) || 3000;
+    const corsOptions: CorsOptions = {
+        origin: ["http://77.47.220.17:3000", "http://localhost:3000"],
+        methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+        credentials: true
+    };
 
     app.setGlobalPrefix("/api");
     app.useGlobalPipes(new ValidationPipe());
+    app.enableCors(corsOptions);
 
-    const config = new DocumentBuilder().setTitle("Degree Project").setVersion("1.0.0").build();
+    const config = new DocumentBuilder().setTitle("Degree Project").setVersion("1.0.0").addBearerAuth().build();
 
     const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup("/api/docs", app, document);
+    SwaggerModule.setup("/api/docs", app, document, {
+        swaggerOptions: {
+            persistAuthorization: true
+        }
+    });
 
     await app.listen(port, () => console.log(`Server started successfully on port: ${port}`));
 }

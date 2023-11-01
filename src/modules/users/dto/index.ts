@@ -14,7 +14,7 @@ export class CreateUserDto {
 
     @ApiProperty({ example: "password" })
     @IsString({ message: ValidationError.MUST_BE_STRING })
-    @Length(8, 16, { message: ValidationError.INVALID_PASSWORD_LENGTH })
+    @Length(8, 32, { message: ValidationError.INVALID_PASSWORD_LENGTH })
     password: string;
 }
 
