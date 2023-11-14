@@ -1,11 +1,18 @@
-import { BelongsTo, Column, DataType, ForeignKey, Model, Table } from "sequelize-typescript";
+import { AfterCreate, AfterUpdate, BelongsTo, Column, DataType, ForeignKey, Model, Table } from "sequelize-typescript";
 import { Shelf } from "../../shelves/models/shelves.model";
 import { ApiProperty } from "@nestjs/swagger";
 import { ProductProperties } from "../../../common/interfaces/common.interfaces";
+import { ProductHooks } from "../hooks";
 
 interface ProductCreationAttrs {
     shelfId: number;
     name: string;
+    amount: number;
+    pricePerUnit: number;
+    weightPerUnit: number;
+    length: number;
+    width: number;
+    height: number;
     properties: ProductProperties;
 }
 
@@ -19,7 +26,31 @@ export class Product extends Model<Product, ProductCreationAttrs> {
     @Column({ type: DataType.STRING, allowNull: false })
     name: string;
 
-    @ApiProperty({ example: { weight: "1 kg" } })
+    @ApiProperty({ example: "13" })
+    @Column({ type: DataType.INTEGER, allowNull: false })
+    amount: number;
+
+    @ApiProperty({ example: "10" })
+    @Column({ type: DataType.DOUBLE, allowNull: false })
+    pricePerUnit: number;
+
+    @ApiProperty({ example: "1" })
+    @Column({ type: DataType.DOUBLE, allowNull: false })
+    weightPerUnit: number;
+
+    @ApiProperty({ example: "1.1" })
+    @Column({ type: DataType.DOUBLE, allowNull: false })
+    length: number;
+
+    @ApiProperty({ example: "1.1" })
+    @Column({ type: DataType.DOUBLE, allowNull: false })
+    width: number;
+
+    @ApiProperty({ example: "1.1" })
+    @Column({ type: DataType.DOUBLE, allowNull: false })
+    height: number;
+
+    @ApiProperty({ example: { model: "New model" } })
     @Column({ type: DataType.JSONB, allowNull: true })
     properties: ProductProperties;
 
@@ -30,4 +61,14 @@ export class Product extends Model<Product, ProductCreationAttrs> {
 
     @BelongsTo(() => Shelf)
     shelf: Shelf;
+
+    @AfterCreate
+    static async afterCreateHook(instance: Product): Promise<void> {
+        await ProductHooks.afterCreate(instance);
+    }
+
+    @AfterUpdate
+    static async afterUpdateHook(instance: Product): Promise<void> {
+        await ProductHooks.afterUpdate(instance);
+    }
 }

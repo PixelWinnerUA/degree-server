@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { CreateProductDto } from "./dto";
 import { InjectModel } from "@nestjs/sequelize";
 import { Product } from "./models/products.model";
-import { getResponseMessageObject } from "../../common/helpers/getResponseMessageObject";
+import { getResponseMessageObjectHelper } from "../../common/helpers/getResponseMessageObject.helper";
 import { ResponseMessages } from "../../common/constants/messages.constants";
 import { ShelvesService } from "../shelves/shelves.service";
 import { SuccessMessageResponse } from "../../common/interfaces/common.interfaces";
@@ -20,7 +20,7 @@ export class ProductsService {
         const product = await this.productRepository.create(dto);
         await shelf.$add("products", product);
 
-        return getResponseMessageObject(ResponseMessages.SUCCESS_PRODUCT_CREATE);
+        return getResponseMessageObjectHelper(ResponseMessages.SUCCESS_PRODUCT_CREATE);
     }
 
     async findById(productId: number, options?: Omit<FindOptions<Product>, "where">): Promise<Product> {

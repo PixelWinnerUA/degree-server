@@ -4,7 +4,7 @@ import { CreateShelfDto, DeleteShelfDto, UpdateShelfDto } from "./dto";
 import { InjectModel } from "@nestjs/sequelize";
 import { FindOptions } from "sequelize";
 import { ResponseMessages } from "../../common/constants/messages.constants";
-import { getResponseMessageObject } from "../../common/helpers/getResponseMessageObject";
+import { getResponseMessageObjectHelper } from "../../common/helpers/getResponseMessageObject.helper";
 import { SuccessMessageResponse } from "../../common/interfaces/common.interfaces";
 import { StoragesService } from "../storages/storages.service";
 import { AppError } from "../../common/constants/errors.constants";
@@ -22,7 +22,7 @@ export class ShelvesService {
 
         await storage.$add("shelves", shelf);
 
-        return getResponseMessageObject(ResponseMessages.SUCCESS_SHELF_CREATE);
+        return getResponseMessageObjectHelper(ResponseMessages.SUCCESS_SHELF_CREATE);
     }
 
     async findById(shelfId: number, options?: Omit<FindOptions<Shelf>, "where">): Promise<Shelf> {
@@ -30,7 +30,7 @@ export class ShelvesService {
     }
 
     async getAll(storageId: number): Promise<Shelf[]> {
-        return await this.shelfRepository.findAll({ where: { storageId }, attributes: { exclude: ["updatedAt"] } });
+        return await this.shelfRepository.findAll({ where: { storageId } });
     }
 
     async update(dto: UpdateShelfDto): Promise<SuccessMessageResponse> {
@@ -42,7 +42,7 @@ export class ShelvesService {
             throw new BadRequestException(AppError.SHELF_UPDATE_ERROR);
         }
 
-        return getResponseMessageObject(ResponseMessages.SUCCESS_SHELF_UPDATE);
+        return getResponseMessageObjectHelper(ResponseMessages.SUCCESS_SHELF_UPDATE);
     }
 
     async delete(dto: DeleteShelfDto): Promise<SuccessMessageResponse> {
@@ -54,6 +54,6 @@ export class ShelvesService {
 
         await shelf.destroy();
 
-        return getResponseMessageObject(ResponseMessages.SUCCESS_SHELF_DELETE);
+        return getResponseMessageObjectHelper(ResponseMessages.SUCCESS_SHELF_DELETE);
     }
 }

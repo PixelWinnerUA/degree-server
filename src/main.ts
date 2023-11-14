@@ -9,7 +9,7 @@ async function start() {
     const app = await NestFactory.create(AppModule);
     const port = Number(process.env.SERVER_PORT) || 3000;
     const corsOptions: CorsOptions = {
-        origin: ["http://77.47.220.17:3000", "http://localhost:3000"],
+        origin: ["http://77.47.220.17:3000", "http://localhost:3000", "http://192.168.31.2:3000"],
         methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
         credentials: true
     };

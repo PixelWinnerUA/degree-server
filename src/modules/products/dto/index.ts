@@ -12,6 +12,30 @@ export class CreateProductDto {
     @IsString({ message: ValidationError.MUST_BE_STRING })
     name: string;
 
+    @ApiProperty({ example: 100 })
+    @IsNumber({}, { message: ValidationError.MUST_BE_NUMBER })
+    amount: number;
+
+    @ApiProperty({ example: 20 })
+    @IsNumber({}, { message: ValidationError.MUST_BE_NUMBER })
+    pricePerUnit: number;
+
+    @ApiProperty({ example: 10 })
+    @IsNumber({}, { message: ValidationError.MUST_BE_NUMBER })
+    weightPerUnit: number;
+
+    @ApiProperty({ example: 2 })
+    @IsNumber({}, { message: ValidationError.MUST_BE_NUMBER })
+    length: number;
+
+    @ApiProperty({ example: 2 })
+    @IsNumber({}, { message: ValidationError.MUST_BE_NUMBER })
+    width: number;
+
+    @ApiProperty({ example: 2 })
+    @IsNumber({}, { message: ValidationError.MUST_BE_NUMBER })
+    height: number;
+
     @ApiProperty({ example: { weight: "1 kg" } })
     @IsObject({ message: ValidationError.MUST_BE_OBJECT })
     properties: ProductProperties;

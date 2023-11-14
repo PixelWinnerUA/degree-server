@@ -11,8 +11,8 @@ export class TokenService {
         return this.jwtService.sign(
             { id },
             {
-                secret: process.env.JWT_SECERT,
-                expiresIn: process.env.JWT_EXPIRE
+                secret: process.env.JWT_SECRET,
+                expiresIn: Number(process.env.JWT_EXPIRE)
             }
         );
     }
