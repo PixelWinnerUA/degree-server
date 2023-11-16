@@ -1,7 +1,7 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, UseGuards } from "@nestjs/common";
 import { ProductsService } from "./products.service";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
-import { CreateProductDto } from "./dto";
+import { CreateProductDto, DeleteProductDto, UpdateProductDto } from "./dto";
 import { SuccessMessageResponse } from "../../common/interfaces/common.interfaces";
 import { JwtAuthGuard } from "../../guards/jwt.guard";
 
@@ -19,7 +19,19 @@ export class ProductsController {
 
     @UseGuards(JwtAuthGuard)
     @Post()
-    async addProduct(@Body() dto: CreateProductDto): Promise<SuccessMessageResponse> {
+    async create(@Body() dto: CreateProductDto): Promise<SuccessMessageResponse> {
         return await this.productsService.create(dto);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Put()
+    async update(@Body() dto: UpdateProductDto): Promise<SuccessMessageResponse> {
+        return await this.productsService.update(dto);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Delete()
+    async delete(@Body() dto: DeleteProductDto): Promise<SuccessMessageResponse> {
+        return await this.productsService.delete(dto);
     }
 }

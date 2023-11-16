@@ -35,10 +35,12 @@ export class ShelvesService {
 
     async update(dto: UpdateShelfDto): Promise<SuccessMessageResponse> {
         const { id, name } = dto;
+        const shelf = await this.findById(id);
+        shelf.name = name;
 
-        const [affectedShelves] = await this.shelfRepository.update({ name }, { where: { id } });
-
-        if (affectedShelves !== 1) {
+        try {
+            await shelf.save();
+        } catch (e) {
             throw new BadRequestException(AppError.SHELF_UPDATE_ERROR);
         }
 
@@ -47,10 +49,6 @@ export class ShelvesService {
 
     async delete(dto: DeleteShelfDto): Promise<SuccessMessageResponse> {
         const shelf = await this.findById(dto.id);
-
-        if (!shelf) {
-            throw new BadRequestException(AppError.SHELF_DELETE_ERROR);
-        }
 
         await shelf.destroy();
 

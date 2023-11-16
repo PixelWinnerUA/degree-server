@@ -37,9 +37,12 @@ export class UsersService {
     }
 
     async updateUserName(dto: UpdateUserDto, id: number): Promise<SuccessMessageResponse> {
-        const [affectedUsers] = await this.userRepository.update(dto, { where: { id } });
+        const user = await this.findById(id);
+        Object.assign(user, dto);
 
-        if (affectedUsers !== 1) {
+        try {
+            await user.save();
+        } catch (e) {
             throw new BadRequestException(AppError.USER_UPDATE_ERROR);
         }
 

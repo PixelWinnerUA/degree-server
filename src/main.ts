@@ -1,9 +1,9 @@
 import { NestFactory } from "@nestjs/core";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
-import { ValidationPipe } from "@nestjs/common";
 import { AppModule } from "./modules/app/app.module";
 import * as process from "process";
 import { CorsOptions } from "@nestjs/common/interfaces/external/cors-options.interface";
+import { ValidationPipe } from "./pipes/validation.pipe";
 
 async function start() {
     const app = await NestFactory.create(AppModule);

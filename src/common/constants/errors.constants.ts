@@ -9,10 +9,14 @@ export const AppError = {
     STORAGE_DELETE_ERROR: "Failed to delete storage.",
     STORAGE_NOT_FOUND: "Storage not found",
     SHELF_NOT_FOUND: "Shelf not found",
+    PRODUCT_NOT_FOUND: "Product not found",
     SHELF_DELETE_ERROR: "Failed to delete shelf.",
     NO_ACCESS: "You do not have access to the requested resource.",
     CANNOT_ADD_YOURSELF: "You cannot add yourself",
-    USER_ALREADY_IN_LIST: "The user is already in the list of storage users"
+    USER_ALREADY_IN_LIST: "The user is already in the list of storage users",
+    PRODUCT_UPDATE_ERROR: "Failed to update product.",
+    PREVIOUS_PRODUCT_STATE_NOT_FOUND: "Previous state of the product not found",
+    SHELF_SUPPORT_ISSUE: "The shelf cannot support the updated weight or volume"
 };
 
 export const ValidationError = {

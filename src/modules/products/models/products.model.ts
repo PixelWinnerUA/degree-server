@@ -1,4 +1,4 @@
-import { AfterCreate, AfterUpdate, BelongsTo, Column, DataType, ForeignKey, Model, Table } from "sequelize-typescript";
+import { AfterDestroy, BeforeCreate, BeforeUpdate, BelongsTo, Column, DataType, ForeignKey, Model, Table } from "sequelize-typescript";
 import { Shelf } from "../../shelves/models/shelves.model";
 import { ApiProperty } from "@nestjs/swagger";
 import { ProductProperties } from "../../../common/interfaces/common.interfaces";
@@ -62,13 +62,18 @@ export class Product extends Model<Product, ProductCreationAttrs> {
     @BelongsTo(() => Shelf)
     shelf: Shelf;
 
-    @AfterCreate
-    static async afterCreateHook(instance: Product): Promise<void> {
-        await ProductHooks.afterCreate(instance);
+    @BeforeCreate
+    static async beforeCreateHook(instance: Product): Promise<void> {
+        await ProductHooks.beforeCreate(instance);
     }
 
-    @AfterUpdate
-    static async afterUpdateHook(instance: Product): Promise<void> {
-        await ProductHooks.afterUpdate(instance);
+    @BeforeUpdate
+    static async beforeUpdateHook(instance: Product): Promise<void> {
+        await ProductHooks.beforeUpdate(instance);
+    }
+
+    @AfterDestroy
+    static async afterDestroyHook(instance: Product): Promise<void> {
+        await ProductHooks.afterDestroy(instance);
     }
 }

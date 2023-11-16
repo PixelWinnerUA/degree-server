@@ -1,5 +1,5 @@
-import { Injectable } from "@nestjs/common";
-import { CreateProductDto } from "./dto";
+import { BadRequestException, Injectable } from "@nestjs/common";
+import { CreateProductDto, DeleteProductDto, UpdateProductDto } from "./dto";
 import { InjectModel } from "@nestjs/sequelize";
 import { Product } from "./models/products.model";
 import { getResponseMessageObjectHelper } from "../../common/helpers/getResponseMessageObject.helper";
@@ -7,6 +7,8 @@ import { ResponseMessages } from "../../common/constants/messages.constants";
 import { ShelvesService } from "../shelves/shelves.service";
 import { SuccessMessageResponse } from "../../common/interfaces/common.interfaces";
 import { FindOptions } from "sequelize";
+import { AppError } from "../../common/constants/errors.constants";
+import { omit } from "lodash";
 
 @Injectable()
 export class ProductsService {
@@ -29,5 +31,27 @@ export class ProductsService {
 
     async getAll(shelfId: number): Promise<Product[]> {
         return await this.productRepository.findAll({ where: { shelfId } });
+    }
+
+    async update(dto: UpdateProductDto): Promise<SuccessMessageResponse> {
+        const product = await this.productRepository.findOne({ where: { id: dto.id } });
+
+        if (!product) {
+            throw new BadRequestException(AppError.PRODUCT_NOT_FOUND);
+        }
+
+        Object.assign(product, omit(dto, "id"));
+
+        await product.save();
+
+        return getResponseMessageObjectHelper(ResponseMessages.SUCCESS_PRODUCT_UPDATE);
+    }
+
+    async delete(dto: DeleteProductDto): Promise<SuccessMessageResponse> {
+        const product = await this.findById(dto.id);
+
+        await product.destroy();
+
+        return getResponseMessageObjectHelper(ResponseMessages.SUCCESS_PRODUCT_DELETE);
     }
 }

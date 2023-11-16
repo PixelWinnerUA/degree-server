@@ -50,10 +50,12 @@ export class StoragesService {
 
     async update(dto: UpdateStorageDto): Promise<SuccessMessageResponse> {
         const { id, name } = dto;
+        const storage = await this.findById(id);
+        storage.name = name;
 
-        const [affectedStorages] = await this.storageRepository.update({ name }, { where: { id } });
-
-        if (affectedStorages !== 1) {
+        try {
+            await storage.save();
+        } catch (e) {
             throw new BadRequestException(AppError.STORAGE_UPDATE_ERROR);
         }
 
@@ -75,7 +77,7 @@ export class StoragesService {
     }
 
     async getStoragesByUserId(userId: number): Promise<GetStorageResponse[]> {
-        const storages = await Storage.findAll({
+        const storages = await this.storageRepository.findAll({
             include: [
                 {
                     model: User,
@@ -104,7 +106,7 @@ export class StoragesService {
 
     async getStorageInfo(id: number): Promise<GetStorageInfoResponse> {
         const users = await this.getUsersById(id);
-        const storage = await this.findById(id, { attributes: { exclude: ["updatedAt"] } });
+        const storage = await this.findById(id);
 
         return { storage, users };
     }

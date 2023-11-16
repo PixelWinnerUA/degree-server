@@ -40,3 +40,15 @@ export class CreateProductDto {
     @IsObject({ message: ValidationError.MUST_BE_OBJECT })
     properties: ProductProperties;
 }
+
+export class UpdateProductDto extends CreateProductDto {
+    @ApiProperty({ example: 1 })
+    @IsNumber({}, { message: ValidationError.MUST_BE_NUMBER })
+    id: number;
+}
+
+export class DeleteProductDto {
+    @ApiProperty({ example: 1 })
+    @IsNumber({}, { message: ValidationError.MUST_BE_NUMBER })
+    id: number;
+}
