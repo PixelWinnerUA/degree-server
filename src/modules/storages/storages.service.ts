@@ -5,12 +5,13 @@ import { Storage } from "./models/storages.model";
 import { UserStorage } from "./models/user-storage.model";
 import { ResponseMessages } from "../../common/constants/messages.constants";
 import { AppError } from "../../common/constants/errors.constants";
-import { GetStorageInfoResponse, GetStorageResponse } from "./response";
+import { GetStorageInfoResponse, GetStorageShelfListResponse } from "./response";
 import { FindOptions } from "sequelize";
 import { getResponseMessageObjectHelper } from "../../common/helpers/getResponseMessageObject.helper";
 import { SuccessMessageResponse } from "../../common/interfaces/common.interfaces";
 import { User } from "../users/models/users.model";
 import { UsersService } from "../users/users.service";
+import { Shelf } from "../shelves/models/shelves.model";
 
 @Injectable()
 export class StoragesService {
@@ -76,18 +77,16 @@ export class StoragesService {
         return getResponseMessageObjectHelper(ResponseMessages.SUCCESS_STORAGE_DELETE);
     }
 
-    async getStoragesByUserId(userId: number): Promise<GetStorageResponse[]> {
-        const storages = await this.storageRepository.findAll({
+    async getStoragesByUserId(userId: number): Promise<Storage[]> {
+        return this.storageRepository.findAll({
             include: [
                 {
-                    model: User,
-                    where: { id: userId },
+                    model: UserStorage,
+                    where: { userId },
                     attributes: []
                 }
             ]
         });
-
-        return storages as GetStorageResponse[];
     }
 
     async getUsersById(id: number): Promise<User[]> {
@@ -96,7 +95,9 @@ export class StoragesService {
                 {
                     model: User,
                     attributes: { exclude: ["password", "createdAt", "updatedAt"] },
-                    through: { attributes: [] }
+                    through: {
+                        attributes: []
+                    }
                 }
             ]
         });
@@ -149,5 +150,23 @@ export class StoragesService {
         await this.userStorageRepository.create({ userId: user.id, storageId: dto.storageId });
 
         return getResponseMessageObjectHelper(ResponseMessages.SUCCESS_USER_ADD);
+    }
+
+    async getStorageShelfList(userId: number): Promise<GetStorageShelfListResponse[]> {
+        return this.storageRepository.findAll({
+            attributes: ["id", "name"],
+            include: [
+                {
+                    model: UserStorage,
+                    where: { userId },
+                    attributes: []
+                },
+                {
+                    model: Shelf,
+                    as: "shelves",
+                    attributes: ["id", "name"]
+                }
+            ]
+        });
     }
 }

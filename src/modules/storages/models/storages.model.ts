@@ -31,6 +31,9 @@ export class Storage extends Model<Storage, StorageCreationAttrs> {
     @BelongsToMany(() => User, () => UserStorage)
     users: User[];
 
+    @HasMany(() => UserStorage)
+    userStorages: UserStorage[];
+
     @HasMany(() => Shelf)
     shelves: Shelf[];
 }

@@ -1,4 +1,4 @@
-import { BelongsToMany, Column, DataType, Model, Table } from "sequelize-typescript";
+import { BelongsToMany, Column, DataType, HasMany, Model, Table } from "sequelize-typescript";
 import { ApiProperty } from "@nestjs/swagger";
 import { UserStorage } from "../../storages/models/user-storage.model";
 import { Storage } from "../../storages/models/storages.model";
@@ -30,4 +30,7 @@ export class User extends Model<User, UserCreationAttrs> {
 
     @BelongsToMany(() => Storage, () => UserStorage)
     storages: Storage[];
+
+    @HasMany(() => UserStorage)
+    userStorages: UserStorage[];
 }

@@ -5,9 +5,10 @@ import { AddUserToStorageDto, CreateStorageDto, DeleteStorageDto, DeleteUserFrom
 import { Request, SuccessMessageResponse } from "../../common/interfaces/common.interfaces";
 import { ResponseMessages } from "../../common/constants/messages.constants";
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
-import { GetStorageInfoResponse, GetStorageResponse } from "./response";
+import { GetStorageInfoResponse, GetStorageShelfListResponse } from "./response";
 import { JwtAuthGuard } from "../../guards/jwt.guard";
 import { StoragesGuard } from "../../guards/storages.guard";
+import { Storage } from "./models/storages.model";
 
 @ApiBearerAuth()
 @ApiTags("Storages")
@@ -24,10 +25,17 @@ export class StoragesController {
     }
 
     @ApiOperation({ description: "Get storages" })
-    @ApiResponse({ status: 200, type: [GetStorageResponse] })
+    @ApiResponse({ status: 200, type: [Storage] })
     @Get()
-    async getAll(@Req() request: Request): Promise<GetStorageResponse[]> {
+    async getAll(@Req() request: Request): Promise<Storage[]> {
         return await this.storagesService.getStoragesByUserId(request.user.id);
+    }
+
+    @ApiOperation({ description: "Get storages and shelf list for table" })
+    @ApiResponse({ status: 200, type: [GetStorageShelfListResponse] })
+    @Get("list")
+    async getStorageShelfList(@Req() request: Request): Promise<GetStorageShelfListResponse[]> {
+        return await this.storagesService.getStorageShelfList(request.user.id);
     }
 
     @ApiOperation({ description: "Storage name update" })

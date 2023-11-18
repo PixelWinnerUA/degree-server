@@ -21,7 +21,10 @@ export const ProductHooks = {
         await shelf.save();
     },
     beforeUpdate: async (product: Product): Promise<HookReturn> => {
-        if (product.changed("amount") || product.changed("length") || product.changed("width") || product.changed("height")) {
+        const isChanged =
+            product.changed("amount") || product.changed("length") || product.changed("width") || product.changed("height") || product.changed("weightPerUnit");
+
+        if (isChanged) {
             const previous = await Product.findByPk(product.id);
             if (!previous) {
                 throw new BadRequestException(AppError.PREVIOUS_PRODUCT_STATE_NOT_FOUND);
