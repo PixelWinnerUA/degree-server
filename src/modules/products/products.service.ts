@@ -9,6 +9,7 @@ import { SuccessMessageResponse } from "../../common/interfaces/common.interface
 import { FindOptions } from "sequelize";
 import { AppError } from "../../common/constants/errors.constants";
 import { omit } from "lodash";
+import { GetAllProductsResponse } from "./response";
 
 @Injectable()
 export class ProductsService {
@@ -29,8 +30,19 @@ export class ProductsService {
         return await this.productRepository.findByPk(productId, options);
     }
 
-    async getAll(shelfId: number): Promise<Product[]> {
-        return await this.productRepository.findAll({ where: { shelfId } });
+    async getAll(shelfId: number, page: number, limit: number): Promise<GetAllProductsResponse> {
+        const offset = (page - 1) * limit;
+
+        const totalProducts = await this.productRepository.count({ where: { shelfId } });
+        const totalPages = Math.ceil(totalProducts / limit);
+
+        const products = await this.productRepository.findAll({
+            where: { shelfId },
+            limit,
+            offset
+        });
+
+        return { products, totalPages, totalProducts };
     }
 
     async update(dto: UpdateProductDto): Promise<SuccessMessageResponse> {
