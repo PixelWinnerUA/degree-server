@@ -25,6 +25,7 @@ export class Storage extends Model<Storage, StorageCreationAttrs> {
     @Column({ type: DataType.STRING, allowNull: false })
     address: string;
 
+    @ApiProperty({ example: 2 })
     @Column({ type: DataType.INTEGER })
     ownerId: number;
 

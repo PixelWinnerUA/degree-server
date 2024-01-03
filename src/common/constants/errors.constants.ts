@@ -15,8 +15,10 @@ export const AppError = {
     CANNOT_ADD_YOURSELF: "You cannot add yourself",
     USER_ALREADY_IN_LIST: "The user is already in the list of storage users",
     PRODUCT_UPDATE_ERROR: "Failed to update product.",
-    PREVIOUS_PRODUCT_STATE_NOT_FOUND: "Previous state of the product not found",
-    SHELF_SUPPORT_ISSUE: "The shelf cannot support the updated weight or volume"
+    PREVIOUS_PRODUCT_STATE_NOT_FOUND: "Previous state of the product not found.",
+    SHELF_SUPPORT_ISSUE: "The shelf cannot support the updated weight or volume.",
+    SUPPLY_PRODUCT_PROPERTIES_ERROR: "Not enough space or weight overload to accommodate the entire product.",
+    NO_VALUES: "No values"
 };
 
 export const ValidationError = {
@@ -24,6 +26,7 @@ export const ValidationError = {
     MUST_BE_STRING: "Must be a string.",
     MUST_BE_NUMBER: "Must be a number.",
     MUST_BE_OBJECT: "Must be a object.",
+    MUST_BE_ARRAY: "Must be a array.",
     INVALID_PASSWORD_LENGTH: "Invalid Password length.",
     INVALID_ADDRESS_LENGTH: "Invalid Address length.",
     INVALID_NAME_LENGTH: "Invalid Name length."

@@ -13,6 +13,8 @@ import { ShelvesModule } from "../shelves/shelves.module";
 import { Shelf } from "../shelves/models/shelves.model";
 import { Product } from "../products/models/products.model";
 import { ProductsModule } from "../products/products.module";
+import { SuppliersModule } from "../suppliers/suppliers.module";
+import { Supplier } from "../suppliers/models/suppliers.model";
 
 @Module({
     imports: [
@@ -24,7 +26,7 @@ import { ProductsModule } from "../products/products.module";
             username: process.env.DATABASE_USERNAME,
             password: process.env.DATABASE_PASSWORD,
             database: process.env.DATABASE_NAME,
-            models: [User, Storage, UserStorage, Shelf, Product],
+            models: [User, Storage, UserStorage, Shelf, Product, Supplier],
             autoLoadModels: true,
             synchronize: true
         }),
@@ -33,7 +35,8 @@ import { ProductsModule } from "../products/products.module";
         TokenModule,
         StoragesModule,
         ShelvesModule,
-        ProductsModule
+        ProductsModule,
+        SuppliersModule
     ],
     controllers: [],
     providers: []

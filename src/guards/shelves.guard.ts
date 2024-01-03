@@ -1,17 +1,21 @@
-import { BadRequestException, CanActivate, ExecutionContext, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
 
 import { Request } from "../common/interfaces/common.interfaces";
 
-import { ShelvesService } from "../modules/shelves/shelves.service";
 import { StoragesGuard } from "./storages.guard";
 import { AppError } from "../common/constants/errors.constants";
 import { HttpMethod } from "../common/enums/api.enums";
+import { Shelf } from "../modules/shelves/models/shelves.model";
+import { Storage } from "../modules/storages/models/storages.model";
+import { UserStorage } from "../modules/storages/models/user-storage.model";
+import { User } from "../modules/users/models/users.model";
+import { InjectModel } from "@nestjs/sequelize";
 
 @Injectable()
 export class ShelvesGuard implements CanActivate {
     constructor(
         private readonly storagesGuard: StoragesGuard,
-        private readonly shelvesService: ShelvesService
+        @InjectModel(Shelf) private shelfRepository: typeof Shelf
     ) {}
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -24,10 +28,6 @@ export class ShelvesGuard implements CanActivate {
         if (isUsesStorageId) {
             const storageId = request.body.storageId || +request.params.storageId;
 
-            if (!storageId) {
-                throw new BadRequestException(AppError.WRONG_DATA);
-            }
-
             return await this.storagesGuard.checkStorageAccess(userId, storageId);
         }
 
@@ -35,18 +35,36 @@ export class ShelvesGuard implements CanActivate {
     }
 
     async checkShelfAccess(userId: number, shelfId: number | undefined): Promise<boolean> {
-        const shelf = await this.shelvesService.findById(shelfId);
+        const shelf = await this.shelfRepository.findOne({
+            where: { id: shelfId },
+            include: [
+                {
+                    model: Storage,
+                    attributes: ["id"],
+                    required: true,
+                    include: [
+                        {
+                            model: UserStorage,
+                            attributes: ["id"],
+                            required: true,
+                            where: { userId: userId },
+                            include: [
+                                {
+                                    model: User,
+                                    attributes: ["id"],
+                                    required: true
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        });
 
         if (!shelf) {
-            throw new NotFoundException(AppError.SHELF_NOT_FOUND);
-        }
-
-        const hasAccessToStorage = await this.storagesGuard.checkStorageAccess(userId, shelf.storageId);
-
-        if (!hasAccessToStorage) {
             throw new BadRequestException(AppError.NO_ACCESS);
         }
 
-        return hasAccessToStorage;
+        return !!shelf;
     }
 }

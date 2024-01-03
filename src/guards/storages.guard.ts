@@ -1,12 +1,15 @@
-import { BadRequestException, CanActivate, ExecutionContext, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
 
 import { Request } from "../common/interfaces/common.interfaces";
-import { StoragesService } from "../modules/storages/storages.service";
 import { AppError } from "../common/constants/errors.constants";
+import { Storage } from "../modules/storages/models/storages.model";
+import { UserStorage } from "../modules/storages/models/user-storage.model";
+import { User } from "../modules/users/models/users.model";
+import { InjectModel } from "@nestjs/sequelize";
 
 @Injectable()
 export class StoragesGuard implements CanActivate {
-    constructor(private readonly storagesService: StoragesService) {}
+    constructor(@InjectModel(Storage) private storageRepository: typeof Storage) {}
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const request: Request = context.switchToHttp().getRequest<Request>();
@@ -17,22 +20,29 @@ export class StoragesGuard implements CanActivate {
     }
 
     async checkStorageAccess(userId: number, storageId: number | undefined): Promise<boolean> {
-        if (!storageId) {
-            throw new NotFoundException(AppError.STORAGE_NOT_FOUND);
-        }
-
-        const storage = await this.storagesService.findById(storageId);
+        const storage = await this.storageRepository.findOne({
+            where: { id: storageId },
+            include: [
+                {
+                    model: UserStorage,
+                    attributes: ["id"],
+                    required: true,
+                    where: { userId: userId },
+                    include: [
+                        {
+                            model: User,
+                            attributes: ["id"],
+                            required: true
+                        }
+                    ]
+                }
+            ]
+        });
 
         if (!storage) {
-            throw new NotFoundException(AppError.STORAGE_NOT_FOUND);
-        }
-
-        const hasAccess = await this.storagesService.userHasAccessToStorage(userId, storageId);
-
-        if (!hasAccess) {
             throw new BadRequestException(AppError.NO_ACCESS);
         }
 
-        return hasAccess;
+        return !!storage;
     }
 }

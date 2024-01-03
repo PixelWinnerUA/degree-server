@@ -7,7 +7,7 @@ import { ResponseMessages } from "../../common/constants/messages.constants";
 import { AppError } from "../../common/constants/errors.constants";
 import { FindAttributeOptions, FindOptions } from "sequelize";
 import { GetPublicUserResponse } from "./response";
-import { getResponseMessageObjectHelper } from "../../common/helpers/getResponseMessageObject.helper";
+import { getResponseMessageObject } from "../../common/helpers/getResponseMessageObject";
 import { SuccessMessageResponse } from "../../common/interfaces/common.interfaces";
 
 @Injectable()
@@ -46,6 +46,6 @@ export class UsersService {
             throw new BadRequestException(AppError.USER_UPDATE_ERROR);
         }
 
-        return getResponseMessageObjectHelper(ResponseMessages.SUCCESS_USER_NAME_UPDATE);
+        return getResponseMessageObject(ResponseMessages.SUCCESS_USER_NAME_UPDATE);
     }
 }

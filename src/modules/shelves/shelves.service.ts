@@ -4,7 +4,7 @@ import { CreateShelfDto, DeleteShelfDto, UpdateShelfDto } from "./dto";
 import { InjectModel } from "@nestjs/sequelize";
 import { FindOptions } from "sequelize";
 import { ResponseMessages } from "../../common/constants/messages.constants";
-import { getResponseMessageObjectHelper } from "../../common/helpers/getResponseMessageObject.helper";
+import { getResponseMessageObject } from "../../common/helpers/getResponseMessageObject";
 import { SuccessMessageResponse } from "../../common/interfaces/common.interfaces";
 import { StoragesService } from "../storages/storages.service";
 import { AppError } from "../../common/constants/errors.constants";
@@ -22,14 +22,14 @@ export class ShelvesService {
 
         await storage.$add("shelves", shelf);
 
-        return getResponseMessageObjectHelper(ResponseMessages.SUCCESS_SHELF_CREATE);
+        return getResponseMessageObject(ResponseMessages.SUCCESS_SHELF_CREATE);
     }
 
     async findById(shelfId: number, options?: Omit<FindOptions<Shelf>, "where">): Promise<Shelf> {
         return await this.shelfRepository.findByPk(shelfId, options);
     }
 
-    async getAll(storageId: number): Promise<Shelf[]> {
+    async getAll(storageId: number | number[]): Promise<Shelf[]> {
         return await this.shelfRepository.findAll({ where: { storageId } });
     }
 
@@ -44,7 +44,7 @@ export class ShelvesService {
             throw new BadRequestException(AppError.SHELF_UPDATE_ERROR);
         }
 
-        return getResponseMessageObjectHelper(ResponseMessages.SUCCESS_SHELF_UPDATE);
+        return getResponseMessageObject(ResponseMessages.SUCCESS_SHELF_UPDATE);
     }
 
     async delete(dto: DeleteShelfDto): Promise<SuccessMessageResponse> {
@@ -52,6 +52,14 @@ export class ShelvesService {
 
         await shelf.destroy();
 
-        return getResponseMessageObjectHelper(ResponseMessages.SUCCESS_SHELF_DELETE);
+        return getResponseMessageObject(ResponseMessages.SUCCESS_SHELF_DELETE);
+    }
+
+    async getShelvesByUserId(userId: number): Promise<Shelf[]> {
+        const userStorages = await this.storagesService.getStoragesByUserId(userId);
+
+        const storageIds = userStorages.map((storage) => storage.id);
+
+        return await this.getAll(storageIds);
     }
 }

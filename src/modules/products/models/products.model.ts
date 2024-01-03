@@ -1,8 +1,9 @@
 import { AfterDestroy, BeforeCreate, BeforeUpdate, BelongsTo, Column, DataType, ForeignKey, Model, Table } from "sequelize-typescript";
 import { Shelf } from "../../shelves/models/shelves.model";
 import { ApiProperty } from "@nestjs/swagger";
-import { ProductProperties } from "../../../common/interfaces/common.interfaces";
 import { ProductHooks } from "../hooks";
+import { DynamicField } from "../dto";
+import { Supplier } from "../../suppliers/models/suppliers.model";
 
 interface ProductCreationAttrs {
     shelfId: number;
@@ -13,7 +14,8 @@ interface ProductCreationAttrs {
     length: number;
     width: number;
     height: number;
-    properties: ProductProperties;
+    properties: DynamicField[];
+    supplierId: number;
 }
 
 @Table({ tableName: "product" })
@@ -50,9 +52,9 @@ export class Product extends Model<Product, ProductCreationAttrs> {
     @Column({ type: DataType.DOUBLE, allowNull: false })
     height: number;
 
-    @ApiProperty({ example: { model: "New model" } })
+    @ApiProperty({ example: [{ label: "Label", value: "Value" }] })
     @Column({ type: DataType.JSONB, allowNull: true })
-    properties: ProductProperties;
+    properties: DynamicField[];
 
     @ApiProperty({ example: 2 })
     @ForeignKey(() => Shelf)
@@ -61,6 +63,14 @@ export class Product extends Model<Product, ProductCreationAttrs> {
 
     @BelongsTo(() => Shelf)
     shelf: Shelf;
+
+    @ApiProperty({ example: 1 })
+    @ForeignKey(() => Supplier)
+    @Column({ type: DataType.INTEGER, allowNull: false })
+    supplierId: number;
+
+    @BelongsTo(() => Supplier)
+    supplier: Supplier;
 
     @BeforeCreate
     static async beforeCreateHook(instance: Product): Promise<void> {

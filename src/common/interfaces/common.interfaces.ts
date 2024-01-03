@@ -11,10 +11,6 @@ export interface IJwtToken {
     exp: number;
 }
 
-export interface ProductProperties {
-    [key: string]: string;
-}
-
 export interface SuccessMessageResponse {
     message: (typeof ResponseMessages)[keyof typeof ResponseMessages];
 }

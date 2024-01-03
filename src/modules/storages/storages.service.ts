@@ -7,7 +7,7 @@ import { ResponseMessages } from "../../common/constants/messages.constants";
 import { AppError } from "../../common/constants/errors.constants";
 import { GetStorageInfoResponse, GetStorageShelfListResponse } from "./response";
 import { FindOptions } from "sequelize";
-import { getResponseMessageObjectHelper } from "../../common/helpers/getResponseMessageObject.helper";
+import { getResponseMessageObject } from "../../common/helpers/getResponseMessageObject";
 import { SuccessMessageResponse } from "../../common/interfaces/common.interfaces";
 import { User } from "../users/models/users.model";
 import { UsersService } from "../users/users.service";
@@ -31,22 +31,11 @@ export class StoragesService {
 
         await this.userStorageRepository.create(userStorage);
 
-        return getResponseMessageObjectHelper(ResponseMessages.SUCCESS_STORAGE_CREATE);
+        return getResponseMessageObject(ResponseMessages.SUCCESS_STORAGE_CREATE);
     }
 
     async findById(storageId: number, options?: Omit<FindOptions<Storage>, "where">): Promise<Storage> {
         return await this.storageRepository.findByPk(storageId, options);
-    }
-
-    async userHasAccessToStorage(userId: number, storageId: number): Promise<boolean> {
-        const userStorage = await UserStorage.findOne({
-            where: {
-                userId,
-                storageId
-            }
-        });
-
-        return !!userStorage;
     }
 
     async update(dto: UpdateStorageDto): Promise<SuccessMessageResponse> {
@@ -60,7 +49,7 @@ export class StoragesService {
             throw new BadRequestException(AppError.STORAGE_UPDATE_ERROR);
         }
 
-        return getResponseMessageObjectHelper(ResponseMessages.SUCCESS_STORAGE_NAME_UPDATE);
+        return getResponseMessageObject(ResponseMessages.SUCCESS_STORAGE_NAME_UPDATE);
     }
 
     async delete(dto: DeleteStorageDto): Promise<SuccessMessageResponse> {
@@ -74,10 +63,10 @@ export class StoragesService {
 
         await storage.destroy();
 
-        return getResponseMessageObjectHelper(ResponseMessages.SUCCESS_STORAGE_DELETE);
+        return getResponseMessageObject(ResponseMessages.SUCCESS_STORAGE_DELETE);
     }
 
-    async getStoragesByUserId(userId: number): Promise<Storage[]> {
+    async getStoragesByUserId(userId: number, options?: FindOptions<Storage>): Promise<Storage[]> {
         return this.storageRepository.findAll({
             include: [
                 {
@@ -85,7 +74,8 @@ export class StoragesService {
                     where: { userId },
                     attributes: []
                 }
-            ]
+            ],
+            ...options
         });
     }
 
@@ -127,7 +117,7 @@ export class StoragesService {
             }
         });
 
-        return getResponseMessageObjectHelper(ResponseMessages.SUCCESS_USER_DELETE_FROM_STORAGE);
+        return getResponseMessageObject(ResponseMessages.SUCCESS_USER_DELETE_FROM_STORAGE);
     }
 
     async addUserToStorage(dto: AddUserToStorageDto, requestUserId: number): Promise<SuccessMessageResponse> {
@@ -149,7 +139,7 @@ export class StoragesService {
 
         await this.userStorageRepository.create({ userId: user.id, storageId: dto.storageId });
 
-        return getResponseMessageObjectHelper(ResponseMessages.SUCCESS_USER_ADD);
+        return getResponseMessageObject(ResponseMessages.SUCCESS_USER_ADD);
     }
 
     async getStorageShelfList(userId: number): Promise<GetStorageShelfListResponse[]> {
