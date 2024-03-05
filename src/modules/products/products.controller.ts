@@ -18,37 +18,37 @@ export class ProductsController {
     @ApiOperation({ description: "Get all products" })
     @ApiResponse({ status: 200, type: GetAllProductsResponse })
     @Get()
-    async getAll(@Query() query: GetAllProductsDto): Promise<GetAllProductsResponse> {
-        return await this.productsService.getAll(query);
+    getAll(@Query() query: GetAllProductsDto): Promise<GetAllProductsResponse> {
+        return this.productsService.getAll(query);
     }
 
     @ApiOperation({ description: "Add product" })
     @ApiResponse({ status: 200, description: ResponseMessages.SUCCESS_PRODUCT_CREATE })
     @Post()
-    async create(@Body() dto: CreateProductDto): Promise<SuccessMessageResponse> {
-        return await this.productsService.create(dto);
+    create(@Body() dto: CreateProductDto): Promise<SuccessMessageResponse> {
+        return this.productsService.create(dto);
     }
 
     @UseGuards(ProductsGuard)
     @ApiOperation({ description: "Update product" })
     @ApiResponse({ status: 200, description: ResponseMessages.SUCCESS_PRODUCT_UPDATE })
     @Put()
-    async update(@Body() dto: UpdateProductDto): Promise<SuccessMessageResponse> {
-        return await this.productsService.update(dto);
+    update(@Body() dto: UpdateProductDto): Promise<SuccessMessageResponse> {
+        return this.productsService.update(dto);
     }
 
     @UseGuards(ProductsGuard)
     @ApiOperation({ description: "Delete product" })
     @ApiResponse({ status: 200, description: ResponseMessages.SUCCESS_PRODUCT_DELETE })
     @Delete()
-    async delete(@Body() dto: DeleteProductDto): Promise<SuccessMessageResponse> {
-        return await this.productsService.delete(dto);
+    delete(@Body() dto: DeleteProductDto): Promise<SuccessMessageResponse> {
+        return this.productsService.delete(dto);
     }
 
     @ApiOperation({ description: "Search product" })
     @ApiResponse({ status: 200, type: [ExtendedSearchProduct] })
     @Get("search")
-    async searchByName(@Query() query: SearchProductsDto): Promise<ExtendedSearchProduct[]> {
-        return await this.productsService.searchByName(query.name);
+    searchByName(@Query() query: SearchProductsDto): Promise<ExtendedSearchProduct[]> {
+        return this.productsService.searchByName(query.name);
     }
 }

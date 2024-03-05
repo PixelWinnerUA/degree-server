@@ -1,4 +1,4 @@
-import { IsArray, IsNumber, IsObject, IsString, ValidateNested } from "class-validator";
+import { IsArray, IsNumber, IsObject, IsOptional, IsString, ValidateNested } from "class-validator";
 import { ValidationError } from "../../../common/constants/errors.constants";
 import { ApiProperty } from "@nestjs/swagger";
 import { Type } from "class-transformer";
@@ -124,6 +124,12 @@ export class GetAllProductsDto {
     @IsNumber({}, { message: ValidationError.MUST_BE_NUMBER })
     @Type(() => Number)
     limit: number;
+
+    @ApiProperty({ example: "Sample Product", required: false })
+    @IsOptional()
+    @IsString({ message: ValidationError.MUST_BE_STRING })
+    @Type(() => String)
+    name?: string;
 }
 
 export class SearchProductsDto {

@@ -1,10 +1,10 @@
 import { BadRequestException, Injectable, InternalServerErrorException } from "@nestjs/common";
 
-import { CreateSupplierDto, CreateSupplyDto } from "./dto";
+import { CreateSupplierDto, CreateSupplyDto, GetStatisticsDto } from "./dto";
 import { InjectModel } from "@nestjs/sequelize";
 import { Supplier } from "./models/suppliers.model";
 import { Sequelize } from "sequelize-typescript";
-import { Transaction } from "sequelize";
+import { Op, Transaction } from "sequelize";
 import { Product } from "../products/models/products.model";
 import { getResponseMessageObject } from "../../common/helpers/getResponseMessageObject";
 import { ResponseMessages } from "../../common/constants/messages.constants";
@@ -26,13 +26,19 @@ export class SuppliersService {
         return await this.supplierRepository.create(dto);
     }
 
+    async findExistSupplier(supplierDto: CreateSupplierDto): Promise<Supplier | undefined> {
+        return await this.supplierRepository.findOne({
+            where: { ...supplierDto }
+        });
+    }
+
     async createSupply(dto: CreateSupplyDto, userId: number): Promise<SuccessMessageResponse> {
         const { products, ...supplierDto } = dto;
 
         const transaction = await this.sequelize.transaction();
 
         try {
-            const supplier = await this.createSupplier(supplierDto);
+            const supplier = (await this.findExistSupplier(supplierDto)) ?? (await this.createSupplier(supplierDto));
 
             for (const product of products) {
                 const supplyProduct = { ...product, supplierId: supplier.id } as Product;
@@ -47,6 +53,12 @@ export class SuppliersService {
             await transaction.rollback();
             throw new InternalServerErrorException(error.message);
         }
+    }
+
+    async getStatistics(dto: GetStatisticsDto) {
+        const { startDate, endDate } = dto;
+
+        return this.productRepository.findAll({ where: { createdAt: { [Op.between]: [startDate, endDate] } }, include: [Supplier] });
     }
 
     async placeProductOnShelf({ userId, product, transaction }: { userId: number; product: Product; transaction: Transaction }): Promise<void> {

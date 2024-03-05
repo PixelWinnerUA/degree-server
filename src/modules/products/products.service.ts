@@ -40,14 +40,16 @@ export class ProductsService {
         return await this.productRepository.findByPk(productId, options);
     }
 
-    async getAll({ shelfId, page, limit }: GetAllProductsDto): Promise<GetAllProductsResponse> {
+    async getAll({ shelfId, page, limit, name = "" }: GetAllProductsDto): Promise<GetAllProductsResponse> {
         const offset = (page - 1) * limit;
 
-        const totalProducts = await this.productRepository.count({ where: { shelfId } });
+        const whereCondition = name ? { shelfId, name: { [Op.like]: `%${name}%` } } : { shelfId };
+
+        const totalProducts = await this.productRepository.count({ where: whereCondition });
         const totalPages = Math.ceil(totalProducts / limit);
 
         const products = await this.productRepository.findAll({
-            where: { shelfId },
+            where: whereCondition,
             limit,
             offset,
             include: [Supplier]

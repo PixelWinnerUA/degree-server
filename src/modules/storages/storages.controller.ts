@@ -20,61 +20,61 @@ export class StoragesController {
     @ApiOperation({ description: "Create storage" })
     @ApiResponse({ status: 200, description: ResponseMessages.SUCCESS_STORAGE_CREATE })
     @Post()
-    async create(@Body() dto: CreateStorageDto, @Req() request: Request): Promise<SuccessMessageResponse> {
-        return await this.storagesService.create(dto, request.user.id);
+    create(@Body() dto: CreateStorageDto, @Req() request: Request): Promise<SuccessMessageResponse> {
+        return this.storagesService.create(dto, request.user.id);
     }
 
     @ApiOperation({ description: "Get storages" })
     @ApiResponse({ status: 200, type: [Storage] })
     @Get()
-    async getAll(@Req() request: Request): Promise<Storage[]> {
-        return await this.storagesService.getStoragesByUserId(request.user.id);
+    getAll(@Req() request: Request): Promise<Storage[]> {
+        return this.storagesService.getStoragesByUserId(request.user.id);
     }
 
     @ApiOperation({ description: "Get storages and shelf list for table" })
     @ApiResponse({ status: 200, type: [GetStorageShelfListResponse] })
     @Get("list")
-    async getStorageShelfList(@Req() request: Request): Promise<GetStorageShelfListResponse[]> {
-        return await this.storagesService.getStorageShelfList(request.user.id);
+    getStorageShelfList(@Req() request: Request): Promise<GetStorageShelfListResponse[]> {
+        return this.storagesService.getStorageShelfList(request.user.id);
     }
 
     @ApiOperation({ description: "Storage name update" })
     @ApiResponse({ status: 200, description: ResponseMessages.SUCCESS_STORAGE_NAME_UPDATE })
     @UseGuards(StoragesGuard)
     @Patch()
-    async update(@Body() dto: UpdateStorageDto): Promise<SuccessMessageResponse> {
-        return await this.storagesService.update(dto);
+    update(@Body() dto: UpdateStorageDto): Promise<SuccessMessageResponse> {
+        return this.storagesService.update(dto);
     }
 
     @ApiOperation({ description: "Delete storage" })
     @ApiResponse({ status: 200, description: ResponseMessages.SUCCESS_STORAGE_DELETE })
     @UseGuards(StoragesGuard)
     @Delete()
-    async delete(@Body() dto: DeleteStorageDto): Promise<SuccessMessageResponse> {
-        return await this.storagesService.delete(dto);
+    delete(@Body() dto: DeleteStorageDto): Promise<SuccessMessageResponse> {
+        return this.storagesService.delete(dto);
     }
 
     @ApiOperation({ description: "Get storage info by Id" })
     @ApiResponse({ status: 200, type: GetStorageInfoResponse })
     @UseGuards(StoragesGuard)
     @Get(":id")
-    async getStorageInfo(@Param("id", ParseIntPipe) id: number): Promise<GetStorageInfoResponse> {
-        return await this.storagesService.getStorageInfo(id);
+    getStorageInfo(@Param("id", ParseIntPipe) id: number): Promise<GetStorageInfoResponse> {
+        return this.storagesService.getStorageInfo(id);
     }
 
     @ApiOperation({ description: "Delete a user from the storage" })
     @ApiResponse({ status: 200, description: ResponseMessages.SUCCESS_USER_DELETE_FROM_STORAGE })
     @UseGuards(StoragesGuard)
     @Delete("deleteUser")
-    async deleteUserFromStorage(@Body() dto: DeleteUserFromStorageDto, @Req() request: Request): Promise<SuccessMessageResponse> {
-        return await this.storagesService.deleteUserFromStorage(dto, request.user.id);
+    deleteUserFromStorage(@Body() dto: DeleteUserFromStorageDto, @Req() request: Request): Promise<SuccessMessageResponse> {
+        return this.storagesService.deleteUserFromStorage(dto, request.user.id);
     }
 
     @ApiOperation({ description: "Add new user to the storage" })
     @ApiResponse({ status: 200, description: ResponseMessages.SUCCESS_USER_ADD })
     @UseGuards(StoragesGuard)
     @Post("addUser")
-    async addUserToStorage(@Body() dto: AddUserToStorageDto, @Req() request: Request): Promise<SuccessMessageResponse> {
-        return await this.storagesService.addUserToStorage(dto, request.user.id);
+    addUserToStorage(@Body() dto: AddUserToStorageDto, @Req() request: Request): Promise<SuccessMessageResponse> {
+        return this.storagesService.addUserToStorage(dto, request.user.id);
     }
 }

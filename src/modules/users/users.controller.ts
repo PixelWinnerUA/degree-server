@@ -19,14 +19,14 @@ export class UsersController {
     @ApiOperation({ description: "User name update" })
     @ApiResponse({ status: 200, description: ResponseMessages.SUCCESS_USER_NAME_UPDATE })
     @Patch()
-    async update(@Body() dto: UpdateUserDto, @Req() request: Request): Promise<SuccessMessageResponse> {
-        return await this.usersService.updateUserName(dto, request.user.id);
+    update(@Body() dto: UpdateUserDto, @Req() request: Request): Promise<SuccessMessageResponse> {
+        return this.usersService.updateUserName(dto, request.user.id);
     }
 
     @ApiOperation({ description: "Get user data" })
     @ApiResponse({ status: 200, description: ResponseMessages.SUCCESS_USER_NAME_UPDATE })
     @Get()
-    async get(@Req() request: Request): Promise<GetPublicUserResponse> {
-        return await this.usersService.getPublicUser(request.user.id);
+    get(@Req() request: Request): Promise<GetPublicUserResponse> {
+        return this.usersService.getPublicUser(request.user.id);
     }
 }

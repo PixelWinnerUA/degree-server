@@ -20,31 +20,31 @@ export class ShelvesController {
     @ApiResponse({ status: 200, type: [Shelf] })
     @UseGuards(ShelvesGuard)
     @Get(":storageId")
-    async getAll(@Param("storageId", ParseIntPipe) id: number): Promise<Shelf[]> {
-        return await this.shelvesService.getAll(id);
+    getAll(@Param("storageId", ParseIntPipe) id: number): Promise<Shelf[]> {
+        return this.shelvesService.getAll(id);
     }
 
     @ApiOperation({ description: "Add shelf" })
     @ApiResponse({ status: 200, description: ResponseMessages.SUCCESS_SHELF_CREATE })
     @UseGuards(ShelvesGuard)
     @Post()
-    async create(@Body() dto: CreateShelfDto): Promise<SuccessMessageResponse> {
-        return await this.shelvesService.create(dto);
+    create(@Body() dto: CreateShelfDto): Promise<SuccessMessageResponse> {
+        return this.shelvesService.create(dto);
     }
 
     @ApiOperation({ description: "Update shelf name" })
     @ApiResponse({ status: 200, description: ResponseMessages.SUCCESS_SHELF_UPDATE })
     @UseGuards(ShelvesGuard)
     @Patch()
-    async update(@Body() dto: UpdateShelfDto): Promise<SuccessMessageResponse> {
-        return await this.shelvesService.update(dto);
+    update(@Body() dto: UpdateShelfDto): Promise<SuccessMessageResponse> {
+        return this.shelvesService.update(dto);
     }
 
     @ApiOperation({ description: "Delete shelf" })
     @ApiResponse({ status: 200, description: ResponseMessages.SUCCESS_SHELF_DELETE })
     @UseGuards(ShelvesGuard)
     @Delete()
-    async delete(@Body() dto: DeleteShelfDto): Promise<SuccessMessageResponse> {
-        return await this.shelvesService.delete(dto);
+    delete(@Body() dto: DeleteShelfDto): Promise<SuccessMessageResponse> {
+        return this.shelvesService.delete(dto);
     }
 }

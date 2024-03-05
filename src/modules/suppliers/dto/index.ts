@@ -39,3 +39,13 @@ export class CreateSupplyDto extends CreateSupplierDto {
     @Type(() => Product)
     products: Product[];
 }
+
+export class GetStatisticsDto {
+    @ApiProperty({ example: "String Date" })
+    @IsString({ message: ValidationError.MUST_BE_STRING })
+    startDate: string;
+
+    @ApiProperty({ example: "String Date" })
+    @IsString({ message: ValidationError.MUST_BE_STRING })
+    endDate: string;
+}
