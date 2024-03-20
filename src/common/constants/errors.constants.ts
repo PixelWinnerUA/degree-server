@@ -18,12 +18,14 @@ export const AppError = {
     PREVIOUS_PRODUCT_STATE_NOT_FOUND: "Previous state of the product not found.",
     SHELF_SUPPORT_ISSUE: "The shelf cannot support the updated weight or volume.",
     SUPPLY_PRODUCT_PROPERTIES_ERROR: "Not enough space or weight overload to accommodate the entire product.",
-    NO_VALUES: "No values"
+    NO_VALUES: "No values",
+    ARCHIVE_ERROR: "Failed to archive product."
 };
 
 export const ValidationError = {
     INVALID_EMAIL: "Invalid email format.",
     MUST_BE_STRING: "Must be a string.",
+    MUST_BE_DATE: "Must be a Date.",
     MUST_BE_NUMBER: "Must be a number.",
     MUST_BE_OBJECT: "Must be a object.",
     MUST_BE_ARRAY: "Must be a array.",

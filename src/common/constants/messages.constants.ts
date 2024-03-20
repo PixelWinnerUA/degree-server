@@ -11,5 +11,7 @@ export const ResponseMessages = {
     SUCCESS_USER_ADD: "User added successfully.",
     SUCCESS_PRODUCT_DELETE: "Product deleted successfully",
     SUCCESS_PRODUCT_UPDATE: "Product updated successfully",
-    SUCCESS_SUPPLY_CREATE: "Supply created successfully"
+    SUCCESS_SUPPLY_CREATE: "Supply created successfully",
+    SUCCESS_ARCHIVE: "Product archived successfully",
+    SUCCESS_UNARCHIVE: "Product unarchived successfully"
 } as const;

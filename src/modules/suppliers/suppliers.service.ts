@@ -55,7 +55,7 @@ export class SuppliersService {
         }
     }
 
-    async getStatistics(dto: GetStatisticsDto) {
+    async getStatistics(dto: GetStatisticsDto): Promise<unknown> {
         const { startDate, endDate } = dto;
 
         return this.productRepository.findAll({ where: { createdAt: { [Op.between]: [startDate, endDate] } }, include: [Supplier] });

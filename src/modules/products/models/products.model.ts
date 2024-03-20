@@ -2,7 +2,7 @@ import { AfterDestroy, BeforeCreate, BeforeUpdate, BelongsTo, Column, DataType, 
 import { Shelf } from "../../shelves/models/shelves.model";
 import { ApiProperty } from "@nestjs/swagger";
 import { ProductHooks } from "../hooks";
-import { DynamicField } from "../dto";
+import { ArchiveRecord, DynamicField } from "../dto";
 import { Supplier } from "../../suppliers/models/suppliers.model";
 
 interface ProductCreationAttrs {
@@ -71,6 +71,14 @@ export class Product extends Model<Product, ProductCreationAttrs> {
 
     @BelongsTo(() => Supplier)
     supplier: Supplier;
+
+    @ApiProperty({ example: [{ reason: "Reason", amount: 10, date: new Date() }] })
+    @Column({ type: DataType.JSONB, allowNull: true })
+    archiveRecords: ArchiveRecord[];
+
+    @ApiProperty({ example: "13" })
+    @Column({ type: DataType.INTEGER, allowNull: false })
+    initialAmount: number;
 
     @BeforeCreate
     static async beforeCreateHook(instance: Product): Promise<void> {

@@ -1,4 +1,4 @@
-import { IsArray, IsNumber, IsObject, IsOptional, IsString, ValidateNested } from "class-validator";
+import { IsArray, IsDate, IsNumber, IsObject, IsOptional, IsString, ValidateNested } from "class-validator";
 import { ValidationError } from "../../../common/constants/errors.constants";
 import { ApiProperty } from "@nestjs/swagger";
 import { Type } from "class-transformer";
@@ -12,6 +12,21 @@ export class DynamicField {
     @ApiProperty({ example: "Value" })
     @IsString()
     value: string;
+}
+
+export class ArchiveRecord {
+    @ApiProperty({ example: "Reason" })
+    @IsString()
+    reason: string;
+
+    @ApiProperty({ example: 100 })
+    @IsNumber({}, { message: ValidationError.MUST_BE_NUMBER })
+    amount: number;
+
+    @ApiProperty({ example: new Date() })
+    @Type(() => Date)
+    @IsDate({ message: ValidationError.MUST_BE_DATE })
+    date: Date;
 }
 
 export class CreateProductDto {
@@ -137,4 +152,34 @@ export class SearchProductsDto {
     @IsString({ message: ValidationError.MUST_BE_STRING })
     @Type(() => String)
     name: string;
+}
+
+export class AddArchiveRecordDto extends ArchiveRecord {
+    @ApiProperty({ example: 1 })
+    @IsNumber({}, { message: ValidationError.MUST_BE_NUMBER })
+    productId: number;
+}
+
+export class GetArchivedProductsDto {
+    @ApiProperty({ example: 2 })
+    @IsNumber({}, { message: ValidationError.MUST_BE_NUMBER })
+    @Type(() => Number)
+    page: number;
+
+    @ApiProperty({ example: 3 })
+    @IsNumber({}, { message: ValidationError.MUST_BE_NUMBER })
+    @Type(() => Number)
+    limit: number;
+
+    @ApiProperty({ example: "Sample Product", required: false })
+    @IsOptional()
+    @IsString({ message: ValidationError.MUST_BE_STRING })
+    @Type(() => String)
+    name?: string;
+}
+
+export class DeleteArchivedRecordDto extends ArchiveRecord {
+    @ApiProperty({ example: 1 })
+    @IsNumber({}, { message: ValidationError.MUST_BE_NUMBER })
+    productId: number;
 }

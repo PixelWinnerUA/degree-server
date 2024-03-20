@@ -1,5 +1,13 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
-import { CreateProductDto, DeleteProductDto, GetAllProductsDto, UpdateProductDto } from "./dto";
+import {
+    AddArchiveRecordDto,
+    CreateProductDto,
+    DeleteArchivedRecordDto,
+    DeleteProductDto,
+    GetAllProductsDto,
+    GetArchivedProductsDto,
+    UpdateProductDto
+} from "./dto";
 import { InjectModel } from "@nestjs/sequelize";
 import { Product } from "./models/products.model";
 import { getResponseMessageObject } from "../../common/helpers/getResponseMessageObject";
@@ -14,6 +22,8 @@ import { Shelf } from "../shelves/models/shelves.model";
 import { Storage } from "../storages/models/storages.model";
 import { SuppliersService } from "../suppliers/suppliers.service";
 import { Supplier } from "../suppliers/models/suppliers.model";
+import { UserStorage } from "../storages/models/user-storage.model";
+import { User } from "../users/models/users.model";
 
 @Injectable()
 export class ProductsService {
@@ -27,7 +37,7 @@ export class ProductsService {
         const shelf = await this.shelvesService.findById(dto.shelfId);
         const supplier = await this.suppliersService.createSupplier(dto.supplier);
 
-        const extendedDto = { ...dto, supplierId: supplier.id };
+        const extendedDto = { ...dto, supplierId: supplier.id, initialAmount: dto.amount };
 
         const product = await this.productRepository.create(extendedDto);
 
@@ -43,7 +53,14 @@ export class ProductsService {
     async getAll({ shelfId, page, limit, name = "" }: GetAllProductsDto): Promise<GetAllProductsResponse> {
         const offset = (page - 1) * limit;
 
-        const whereCondition = name ? { shelfId, name: { [Op.like]: `%${name}%` } } : { shelfId };
+        const whereCondition = {
+            shelfId,
+            amount: { [Op.gt]: 0 }
+        };
+
+        if (name) {
+            Object.assign(whereCondition, { name: { [Op.like]: `%${name}%` } });
+        }
 
         const totalProducts = await this.productRepository.count({ where: whereCondition });
         const totalPages = Math.ceil(totalProducts / limit);
@@ -56,6 +73,61 @@ export class ProductsService {
         });
 
         return { products, totalPages, totalProducts };
+    }
+
+    async getArchived({ page, limit, name = "" }: GetArchivedProductsDto, userId: number): Promise<GetAllProductsResponse> {
+        const offset = (page - 1) * limit;
+        const whereCondition = {
+            archiveRecords: {
+                [Op.and]: [{ [Op.ne]: null }, { [Op.not]: "[]" }]
+            }
+        };
+
+        if (name) {
+            Object.assign(whereCondition, { name: { [Op.like]: `%${name}%` } });
+        }
+
+        const userStorageCondition = {
+            model: Shelf,
+            required: true,
+            include: [
+                {
+                    model: Storage,
+                    required: true,
+                    include: [
+                        {
+                            model: UserStorage,
+                            required: true,
+                            where: { userId },
+                            include: [
+                                {
+                                    model: User,
+                                    attributes: [],
+                                    required: true
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        };
+
+        const totalProducts = await this.productRepository.count({
+            where: whereCondition,
+            include: [userStorageCondition]
+        });
+        const totalPages = Math.ceil(totalProducts / limit);
+
+        const products = await this.productRepository.findAll({
+            where: whereCondition,
+            limit,
+            offset,
+            include: [Supplier, userStorageCondition]
+        });
+
+        const omittedProducts = products.map((product) => omit(product.toJSON(), "shelf")) as Product[];
+
+        return { products: omittedProducts, totalPages, totalProducts };
     }
 
     async update(dto: UpdateProductDto): Promise<SuccessMessageResponse> {
@@ -112,5 +184,41 @@ export class ProductsService {
                 storageName: productJSON.shelf?.storage?.name
             };
         });
+    }
+
+    async archive(dto: AddArchiveRecordDto): Promise<SuccessMessageResponse> {
+        const { productId, ...archiveRecord } = dto;
+
+        const product = await this.findById(productId);
+
+        product.amount = product.amount - archiveRecord.amount;
+
+        if (product.amount < 0) {
+            throw new BadRequestException(AppError.ARCHIVE_ERROR);
+        }
+
+        if (!product.archiveRecords) {
+            product.archiveRecords = [archiveRecord];
+        } else {
+            product.archiveRecords = [...product.archiveRecords, archiveRecord];
+        }
+
+        await product.save();
+
+        return getResponseMessageObject(ResponseMessages.SUCCESS_ARCHIVE);
+    }
+
+    async deleteArchiveRecord(dto: DeleteArchivedRecordDto): Promise<SuccessMessageResponse> {
+        const { productId, ...archiveRecord } = dto;
+
+        const product = await this.findById(productId);
+
+        product.archiveRecords = product.archiveRecords.filter((record) => record.date !== archiveRecord.date);
+
+        product.amount = product.amount + archiveRecord.amount;
+
+        await product.save();
+
+        return getResponseMessageObject(ResponseMessages.SUCCESS_UNARCHIVE);
     }
 }
