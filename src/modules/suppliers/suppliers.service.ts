@@ -41,7 +41,7 @@ export class SuppliersService {
             const supplier = (await this.findExistSupplier(supplierDto)) ?? (await this.createSupplier(supplierDto));
 
             for (const product of products) {
-                const supplyProduct = { ...product, supplierId: supplier.id } as Product;
+                const supplyProduct = { ...product, supplierId: supplier.id, initialAmount: product.amount } as Product;
 
                 await this.placeProductOnShelf({ userId, product: supplyProduct, transaction });
             }
