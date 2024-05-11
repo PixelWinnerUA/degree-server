@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Patch, Post, Req, UseGuards } from "@nestjs/common";
 import { UsersService } from "./users.service";
 
 import { UpdateUserDto } from "./dto";
@@ -8,6 +8,7 @@ import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagg
 import { ResponseMessages } from "../../common/constants/messages.constants";
 import { GetPublicUserResponse } from "./response";
 import { JwtAuthGuard } from "../../guards/jwt.guard";
+import { ChangePasswordDto } from "../auth/dto";
 
 @ApiBearerAuth()
 @ApiTags("Users")
@@ -28,5 +29,12 @@ export class UsersController {
     @Get()
     get(@Req() request: Request): Promise<GetPublicUserResponse> {
         return this.usersService.getPublicUser(request.user.id);
+    }
+
+    @ApiOperation({ description: "Change password" })
+    @ApiResponse({ status: 200, description: ResponseMessages.SUCCESS_PASSWORD_CHANGE })
+    @Post("changePassword")
+    changePassword(@Body() dto: ChangePasswordDto, @Req() request: Request): Promise<SuccessMessageResponse> {
+        return this.usersService.changePassword(dto, request.user.id);
     }
 }

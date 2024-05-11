@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { User } from "./models/users.model";
 import { InjectModel } from "@nestjs/sequelize";
-import { hash } from "bcrypt";
+import { compare, hash } from "bcrypt";
 import { CreateUserDto, UpdateUserDto } from "./dto";
 import { ResponseMessages } from "../../common/constants/messages.constants";
 import { AppError } from "../../common/constants/errors.constants";
@@ -9,6 +9,7 @@ import { FindAttributeOptions, FindOptions } from "sequelize";
 import { GetPublicUserResponse } from "./response";
 import { getResponseMessageObject } from "../../common/helpers/getResponseMessageObject";
 import { SuccessMessageResponse } from "../../common/interfaces/common.interfaces";
+import { ChangePasswordDto } from "../auth/dto";
 
 @Injectable()
 export class UsersService {
@@ -47,5 +48,27 @@ export class UsersService {
         }
 
         return getResponseMessageObject(ResponseMessages.SUCCESS_USER_NAME_UPDATE);
+    }
+
+    async changePassword(dto: ChangePasswordDto, userId: number): Promise<SuccessMessageResponse> {
+        const { oldPassword, newPassword } = dto;
+
+        if (oldPassword === newPassword) {
+            throw new BadRequestException(AppError.PASSWORDS_MUST_NOT_MATCH);
+        }
+
+        const existUser = await this.findById(userId);
+
+        const isValidPassword = await compare(dto.oldPassword, existUser.password);
+
+        if (!isValidPassword) {
+            throw new BadRequestException(AppError.WRONG_DATA);
+        }
+
+        existUser.password = await this.hashPassword(newPassword);
+
+        await existUser.save();
+
+        return getResponseMessageObject(ResponseMessages.SUCCESS_PASSWORD_CHANGE);
     }
 }

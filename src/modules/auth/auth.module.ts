@@ -4,9 +4,10 @@ import { AuthController } from "./auth.controller";
 import { UsersModule } from "../users/users.module";
 import { TokenModule } from "../token/token.module";
 import { JwtStrategy } from "../../strategy";
+import { MailerModule } from "@nestjs-modules/mailer";
 
 @Module({
-    imports: [UsersModule, TokenModule],
+    imports: [UsersModule, TokenModule, MailerModule],
     controllers: [AuthController],
     providers: [AuthService, JwtStrategy]
 })

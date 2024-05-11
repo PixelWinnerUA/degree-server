@@ -19,8 +19,10 @@ export const AppError = {
     SHELF_SUPPORT_ISSUE: "The shelf cannot support the updated weight or volume.",
     SUPPLY_PRODUCT_PROPERTIES_ERROR: "Not enough space or weight overload to accommodate the entire product.",
     NO_VALUES: "No values",
-    ARCHIVE_ERROR: "Failed to archive product."
-};
+    ARCHIVE_ERROR: "Failed to archive product.",
+    PASSWORDS_MUST_NOT_MATCH: "Passwords must not match.",
+    INVALID_RECOVERY_CODE: "Invalid recovery code or code expired"
+} as const;
 
 export const ValidationError = {
     INVALID_EMAIL: "Invalid email format.",
@@ -31,5 +33,6 @@ export const ValidationError = {
     MUST_BE_ARRAY: "Must be a array.",
     INVALID_PASSWORD_LENGTH: "Invalid Password length.",
     INVALID_ADDRESS_LENGTH: "Invalid Address length.",
-    INVALID_NAME_LENGTH: "Invalid Name length."
-};
+    INVALID_NAME_LENGTH: "Invalid Name length.",
+    INVALID_RECOVERY_CODE: "Invalid Code."
+} as const;

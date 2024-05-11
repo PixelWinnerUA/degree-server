@@ -13,5 +13,7 @@ export const ResponseMessages = {
     SUCCESS_PRODUCT_UPDATE: "Product updated successfully",
     SUCCESS_SUPPLY_CREATE: "Supply created successfully",
     SUCCESS_ARCHIVE: "Product archived successfully",
-    SUCCESS_UNARCHIVE: "Product unarchived successfully"
+    SUCCESS_UNARCHIVE: "Product unarchived successfully",
+    SUCCESS_PASSWORD_CHANGE: "Password changed successfully",
+    RECOVERY_CODE_SEND: "The recovery code has been sent to your email."
 } as const;
