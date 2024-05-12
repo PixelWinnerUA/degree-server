@@ -34,7 +34,7 @@ export class AuthController {
         return this.authService.sendRecoveryCode(dto);
     }
     @ApiOperation({ description: "Reset password" })
-    @ApiResponse({ status: 200, description: ResponseMessages.SUCCESS_ARCHIVE })
+    @ApiResponse({ status: 200, description: ResponseMessages.SUCCESS_PASSWORD_CHANGE })
     @Post("reset")
     resetPassword(@Body() dto: ResetPasswordDto): Promise<SuccessMessageResponse> {
         return this.authService.resetPassword(dto);
