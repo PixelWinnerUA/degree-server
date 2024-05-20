@@ -31,7 +31,8 @@ export class ProductsService {
         @InjectModel(Product) private productRepository: typeof Product,
         private readonly shelvesService: ShelvesService,
         private readonly suppliersService: SuppliersService
-    ) {}
+    ) {
+    }
 
     async create(dto: CreateProductDto): Promise<SuccessMessageResponse> {
         const shelf = await this.shelvesService.findById(dto.shelfId);
@@ -214,6 +215,10 @@ export class ProductsService {
         const product = await this.findById(productId);
 
         product.archiveRecords = product.archiveRecords.filter((record) => record.date !== archiveRecord.date);
+
+        if (!product.archiveRecords.length) {
+            product.archiveRecords = null;
+        }
 
         product.amount = product.amount + archiveRecord.amount;
 
