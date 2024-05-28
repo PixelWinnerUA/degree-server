@@ -24,6 +24,7 @@ import { SuppliersService } from "../suppliers/suppliers.service";
 import { Supplier } from "../suppliers/models/suppliers.model";
 import { UserStorage } from "../storages/models/user-storage.model";
 import { User } from "../users/models/users.model";
+import { Shipment } from "../shipments/models/shipments.model";
 
 @Injectable()
 export class ProductsService {
@@ -31,8 +32,7 @@ export class ProductsService {
         @InjectModel(Product) private productRepository: typeof Product,
         private readonly shelvesService: ShelvesService,
         private readonly suppliersService: SuppliersService
-    ) {
-    }
+    ) {}
 
     async create(dto: CreateProductDto): Promise<SuccessMessageResponse> {
         const shelf = await this.shelvesService.findById(dto.shelfId);
@@ -56,7 +56,11 @@ export class ProductsService {
 
         const whereCondition = {
             shelfId,
-            amount: { [Op.gt]: 0 }
+            [Op.not]: [
+                {
+                    [Op.and]: [{ amount: 0 }, { archiveRecords: { [Op.ne]: null } }]
+                }
+            ]
         };
 
         if (name) {
@@ -70,7 +74,13 @@ export class ProductsService {
             where: whereCondition,
             limit,
             offset,
-            include: [Supplier]
+            include: [
+                Supplier,
+                {
+                    model: Shipment,
+                    through: { attributes: [] }
+                }
+            ]
         });
 
         return { products, totalPages, totalProducts };
@@ -123,7 +133,14 @@ export class ProductsService {
             where: whereCondition,
             limit,
             offset,
-            include: [Supplier, userStorageCondition]
+            include: [
+                Supplier,
+                {
+                    model: Shipment,
+                    through: { attributes: [] }
+                },
+                userStorageCondition
+            ]
         });
 
         const omittedProducts = products.map((product) => omit(product.toJSON(), "shelf")) as Product[];
@@ -148,6 +165,10 @@ export class ProductsService {
     async delete(dto: DeleteProductDto): Promise<SuccessMessageResponse> {
         const product = await this.findById(dto.id);
 
+        if (product.shipments) {
+            throw new BadRequestException(AppError.PRODUCT_CANNOT_BE_DELETED_DUE_SHIPMENTS);
+        }
+
         await product.destroy();
 
         return getResponseMessageObject(ResponseMessages.SUCCESS_PRODUCT_DELETE);
@@ -171,6 +192,10 @@ export class ProductsService {
                 },
                 {
                     model: Supplier
+                },
+                {
+                    model: Shipment,
+                    through: { attributes: [] }
                 }
             ]
         });

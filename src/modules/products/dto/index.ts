@@ -6,17 +6,17 @@ import { CreateSupplierDto } from "../../suppliers/dto";
 
 export class DynamicField {
     @ApiProperty({ example: "Label" })
-    @IsString()
+    @IsString({ message: ValidationError.MUST_BE_STRING })
     label: string;
 
     @ApiProperty({ example: "Value" })
-    @IsString()
+    @IsString({ message: ValidationError.MUST_BE_STRING })
     value: string;
 }
 
 export class ArchiveRecord {
     @ApiProperty({ example: "Reason" })
-    @IsString()
+    @IsString({ message: ValidationError.MUST_BE_STRING })
     reason: string;
 
     @ApiProperty({ example: 100 })

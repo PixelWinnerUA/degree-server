@@ -18,6 +18,10 @@ import { Supplier } from "../suppliers/models/suppliers.model";
 import { CacheModule } from "@nestjs/cache-manager";
 import { MailerModule } from "@nestjs-modules/mailer";
 import { SECONDS_IN_MINUTE } from "../../common/constants/common.constants";
+import { ShipmentsModule } from "../shipments/shipments.module";
+import { Shipment } from "../shipments/models/shipments.model";
+import { ShipmentProducts } from "../shipments/models/shipment-products.model";
+
 
 @Module({
     imports: [
@@ -29,7 +33,7 @@ import { SECONDS_IN_MINUTE } from "../../common/constants/common.constants";
             username: process.env.DATABASE_USERNAME,
             password: process.env.DATABASE_PASSWORD,
             database: process.env.DATABASE_NAME,
-            models: [User, Storage, UserStorage, Shelf, Product, Supplier],
+            models: [User, Storage, UserStorage, Shelf, Product, Supplier, Shipment, ShipmentProducts],
             autoLoadModels: true,
             synchronize: true
         }),
@@ -40,6 +44,7 @@ import { SECONDS_IN_MINUTE } from "../../common/constants/common.constants";
         ShelvesModule,
         ProductsModule,
         SuppliersModule,
+        ShipmentsModule,
         CacheModule.register({
             ttl: SECONDS_IN_MINUTE * 15,
             isGlobal: true
@@ -49,7 +54,7 @@ import { SECONDS_IN_MINUTE } from "../../common/constants/common.constants";
                 host: process.env.MAIL_HOST,
                 port: process.env.MAIL_PORT,
                 ignoreTLS: false,
-                secure: process.env.MAIL_PORT === "465", //Google smtp port
+                secure: process.env.MAIL_PORT === "465",
                 auth: {
                     user: process.env.MAIL_USERNAME,
                     pass: process.env.MAIL_PASSWORD

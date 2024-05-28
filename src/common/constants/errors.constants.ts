@@ -21,7 +21,10 @@ export const AppError = {
     NO_VALUES: "No values",
     ARCHIVE_ERROR: "Failed to archive product.",
     PASSWORDS_MUST_NOT_MATCH: "Passwords must not match.",
-    INVALID_RECOVERY_CODE: "Invalid recovery code or code expired"
+    INVALID_RECOVERY_CODE: "Invalid recovery code or code expired.",
+    WRONG_PRODUCT_AMOUNT_FOR_SHIPMENT: "Wrong amount of product for shipment.",
+    PRODUCT_CANNOT_BE_DELETED_DUE_SHIPMENTS: "The product cannot be deleted because it has associated shipments",
+    SHIPMENT_NOT_FOUND: "Shipment not found"
 } as const;
 
 export const ValidationError = {

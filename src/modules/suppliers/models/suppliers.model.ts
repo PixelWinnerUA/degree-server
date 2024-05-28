@@ -36,7 +36,7 @@ export class Supplier extends Model<Supplier, SupplierCreationAttrs> {
     @Column({ type: DataType.STRING, allowNull: false })
     legalAddress: string;
 
-    @ApiProperty({ example: "Phone number" })
+    @ApiProperty({ example: "+380990000000" })
     @Column({ type: DataType.STRING, allowNull: false })
     phoneNumber: string;
 }

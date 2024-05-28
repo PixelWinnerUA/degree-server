@@ -1,9 +1,11 @@
-import { AfterDestroy, BeforeCreate, BeforeUpdate, BelongsTo, Column, DataType, ForeignKey, Model, Table } from "sequelize-typescript";
+import { AfterDestroy, BeforeCreate, BeforeUpdate, BelongsTo, Column, DataType, ForeignKey, BelongsToMany, Model, Table } from "sequelize-typescript";
 import { Shelf } from "../../shelves/models/shelves.model";
 import { ApiProperty } from "@nestjs/swagger";
 import { ProductHooks } from "../hooks";
 import { ArchiveRecord, DynamicField } from "../dto";
 import { Supplier } from "../../suppliers/models/suppliers.model";
+import { Shipment } from "../../shipments/models/shipments.model";
+import { ShipmentProducts } from "../../shipments/models/shipment-products.model";
 
 interface ProductCreationAttrs {
     shelfId: number;
@@ -79,6 +81,9 @@ export class Product extends Model<Product, ProductCreationAttrs> {
     @ApiProperty({ example: "13" })
     @Column({ type: DataType.INTEGER, allowNull: false })
     initialAmount: number;
+
+    @BelongsToMany(() => Shipment, () => ShipmentProducts)
+    shipments: Shipment[];
 
     @BeforeCreate
     static async beforeCreateHook(instance: Product): Promise<void> {

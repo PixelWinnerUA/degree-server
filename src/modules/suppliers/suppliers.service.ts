@@ -12,6 +12,7 @@ import { SuccessMessageResponse } from "../../common/interfaces/common.interface
 import { ShelvesService } from "../shelves/shelves.service";
 import { AppError } from "../../common/constants/errors.constants";
 import { Shelf } from "../shelves/models/shelves.model";
+import { Shipment } from "../shipments/models/shipments.model";
 
 @Injectable()
 export class SuppliersService {
@@ -58,7 +59,16 @@ export class SuppliersService {
     async getStatistics(dto: GetStatisticsDto): Promise<unknown> {
         const { startDate, endDate } = dto;
 
-        return this.productRepository.findAll({ where: { createdAt: { [Op.between]: [startDate, endDate] } }, include: [Supplier] });
+        return this.productRepository.findAll({
+            where: { createdAt: { [Op.between]: [startDate, endDate] } },
+            include: [
+                Supplier,
+                {
+                    model: Shipment,
+                    through: { attributes: [] }
+                }
+            ]
+        });
     }
 
     async placeProductOnShelf({ userId, product, transaction }: { userId: number; product: Product; transaction: Transaction }): Promise<void> {
