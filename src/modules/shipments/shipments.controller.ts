@@ -1,10 +1,11 @@
-import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Query, UseGuards } from "@nestjs/common";
 import { JwtAuthGuard } from "../../guards/jwt.guard";
 import { SuccessMessageResponse } from "../../common/interfaces/common.interfaces";
 import { ShipmentsService } from "./shipments.service";
 import { CreateShipmentDto, GetShipmentsDto } from "./dto";
-import { GetAllShipmentProductsResponse } from "./response";
+import { Shipment } from "./models/shipments.model";
+import { ResponseMessages } from "../../common/constants/messages.constants";
 
 @ApiBearerAuth()
 @ApiTags("Shipments")
@@ -13,17 +14,23 @@ import { GetAllShipmentProductsResponse } from "./response";
 export class ShipmentsController {
     constructor(private readonly shipmentService: ShipmentsService) {
     }
-//todo swagger
+
+    @ApiOperation({ description: "Create shipment" })
+    @ApiResponse({ status: 200, description: ResponseMessages.SUCCESS_SHIPMENT_CREATE })
     @Post()
     create(@Body() dto: CreateShipmentDto): Promise<SuccessMessageResponse> {
         return this.shipmentService.create(dto);
     }
 
+    @ApiOperation({ description: "Get all shipments" })
+    @ApiResponse({ status: 200, type: [Shipment] })
     @Get()
-    getAllShipmentProducts(@Query() query: GetShipmentsDto): Promise<GetAllShipmentProductsResponse> {
-        return this.shipmentService.getAllShipmentProducts(query);
+    getAll(@Query() query: GetShipmentsDto): Promise<Shipment[]> {
+        return this.shipmentService.getAll(query);
     }
 
+    @ApiOperation({ description: "Delete shipment" })
+    @ApiResponse({ status: 200, description: ResponseMessages.SUCCESS_SHIPMENT_DELETE })
     @Delete("id")
     delete(@Param("id", ParseIntPipe) id: number): Promise<SuccessMessageResponse> {
         return this.shipmentService.delete(id);

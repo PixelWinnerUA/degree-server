@@ -35,7 +35,7 @@ export class Shipment extends Model<Shipment, ShipmentCreationAttrs> {
     address: string;
 
     @ApiProperty({ example: "email@example.com" })
-    @Column({ type: DataType.STRING, unique: true, allowNull: false })
+    @Column({ type: DataType.STRING, allowNull: false })
     email: string;
 
     @ApiProperty({ example: "+380990000000" })

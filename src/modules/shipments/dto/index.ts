@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsArray, IsEmail, IsNumber, IsOptional, IsPhoneNumber, IsString, Min, ValidateNested } from "class-validator";
+import { IsArray, IsEmail, IsNumber, IsPhoneNumber, IsString, Min, ValidateNested } from "class-validator";
 import { ValidationError } from "../../../common/constants/errors.constants";
 import { Type } from "class-transformer";
 
@@ -63,20 +63,4 @@ export class GetShipmentsDto {
     @ApiProperty({ example: "String Date" })
     @IsString({ message: ValidationError.MUST_BE_STRING })
     endDate: string;
-
-    @ApiProperty({ example: 2 })
-    @IsNumber({}, { message: ValidationError.MUST_BE_NUMBER })
-    @Type(() => Number)
-    page: number;
-
-    @ApiProperty({ example: 3 })
-    @IsNumber({}, { message: ValidationError.MUST_BE_NUMBER })
-    @Type(() => Number)
-    limit: number;
-
-    @ApiProperty({ example: "Sample Product", required: false })
-    @IsOptional()
-    @IsString({ message: ValidationError.MUST_BE_STRING })
-    @Type(() => String)
-    productName?: string;
 }

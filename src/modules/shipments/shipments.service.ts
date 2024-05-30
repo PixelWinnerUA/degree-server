@@ -9,11 +9,8 @@ import { AppError } from "../../common/constants/errors.constants";
 import { Sequelize } from "sequelize-typescript";
 import { Op } from "sequelize";
 import { Product } from "../products/models/products.model";
-import { Storage } from "../storages/models/storages.model";
-import { Supplier } from "../suppliers/models/suppliers.model";
-import { Shelf } from "../shelves/models/shelves.model";
-import { GetAllShipmentProductsResponse } from "./response";
 import { ShipmentProducts } from "./models/shipment-products.model";
+import { Supplier } from "../suppliers/models/suppliers.model";
 
 @Injectable()
 export class ShipmentsService {
@@ -30,7 +27,7 @@ export class ShipmentsService {
     }
 
     async create(createShipmentDto: CreateShipmentDto): Promise<SuccessMessageResponse> {
-        const { name, surname, patronymic, address, email, phoneNumber, products, } = createShipmentDto;
+        const { name, surname, patronymic, address, email, phoneNumber, products } = createShipmentDto;
 
         const transaction = await this.sequelize.transaction();
 
@@ -73,57 +70,22 @@ export class ShipmentsService {
         }
     }
 
-    async getAllShipmentProducts(dto: GetShipmentsDto): Promise<GetAllShipmentProductsResponse> {
-        const { startDate, endDate, productName, limit, page } = dto;
-
-        const offset = (page - 1) * limit;
+    async getAll(dto: GetShipmentsDto): Promise<Shipment[]> {
+        const { startDate, endDate } = dto;
 
         const whereCondition = {
             createdAt: { [Op.between]: [startDate, endDate] }
         };
 
-        if (productName) {
-            Object.assign(whereCondition, { name: { [Op.like]: `%${productName}%` } });
-        }
-
-        const products = await this.productRepository.findAll({
-            where: whereCondition,
-            limit,
-            offset,
-            include: [
-                {
-                    model: Shelf,
-                    attributes: [],
-                    include: [
-                        {
-                            model: Storage,
-                            attributes: []
-                        }
-                    ]
-                },
-                {
-                    model: Supplier
-                },
-                {
-                    model: Shipment,
-                    required: true
-                }
-            ]
-        });
-
-        const totalProducts = await this.productRepository.count({
+        return await this.shipmentRepository.findAll({
             where: whereCondition,
             include: [
                 {
-                    model: Shipment,
-                    required: true
+                    model: Product,
+                    include: [Shipment, Supplier]
                 }
             ]
         });
-
-        const totalPages = Math.ceil(totalProducts / limit);
-
-        return { products, totalProducts, totalPages };
     }
 
     async delete(id: number): Promise<SuccessMessageResponse> {
